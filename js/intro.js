@@ -28,16 +28,22 @@ class IntroManager {
   }
 
   // 안개 한 덩어리를 미리 그려둔 스프라이트 — 매 프레임 그라디언트를 새로 만들지 않습니다
+  // 색은 css/style.css 의 --fog-particle-*-rgb, --bg-rgb 변수를 읽어 옵니다
   createFogSprite() {
+    const css = getComputedStyle(document.documentElement);
+    const rgb = (name, fallback) => css.getPropertyValue(name).trim() || fallback;
+    const core = rgb('--fog-particle-core-rgb', '40, 36, 32');
+    const mid = rgb('--fog-particle-mid-rgb', '22, 19, 16');
+    const edge = rgb('--bg-rgb', '14, 12, 10');
     const size = 256;
     const sprite = document.createElement('canvas');
     sprite.width = sprite.height = size;
     const g = sprite.getContext('2d');
     const half = size / 2;
     const grad = g.createRadialGradient(half, half, 0, half, half, half);
-    grad.addColorStop(0, 'rgba(40, 36, 32, 1)');
-    grad.addColorStop(0.5, 'rgba(22, 19, 16, 0.53)');
-    grad.addColorStop(1, 'rgba(14, 12, 10, 0)');
+    grad.addColorStop(0, `rgba(${core}, 1)`);
+    grad.addColorStop(0.5, `rgba(${mid}, 0.53)`);
+    grad.addColorStop(1, `rgba(${edge}, 0)`);
     g.fillStyle = grad;
     g.fillRect(0, 0, size, size);
     return sprite;

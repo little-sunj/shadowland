@@ -3,43 +3,96 @@
    ========================================================================== */
 
 :root {
-  /* 배경 (먹) */
-  --bg-deep: #0e0c0a;
+  /* ==================================================================
+     색 팔레트 — 사이트의 모든 색은 여기서만 정의합니다.
+     *-rgb 변수는 투명도가 다른 같은 색을 만들 때 씁니다:
+       예) rgba(var(--accent-rgb), 0.3)
+     ※ 한 색을 바꿀 때는 hex 와 *-rgb 를 함께 바꿔 주세요.
+     ================================================================== */
+
+  /* 먹 (배경) */
+  --bg-deep: #0e0c0a;          --bg-rgb: 14, 12, 10;
+  --bg-map: #14110e;                                   /* 지도 바깥 여백 */
+  --bg-night: #0b0907;                                 /* 야간 지도 바깥 여백 */
+  --ink-panel-rgb: 20, 17, 14;                         /* 툴팁·안내 알약 등 어두운 반투명 판 */
+  --backdrop-rgb: 10, 8, 6;                            /* 모달 뒤 어둡게 가리는 막 */
 
   /* 텍스트 (어두운 바탕 위) */
   --text-main: #efe6d6;
   --text-body: #d8cdb8;
   --text-dim: #a89c86;
+  --text-button: #e9dfcc;
 
-  /* 한지 (족자·모달 바탕) 와 그 위의 먹 글씨 */
-  --hanji: #f3ead6;
+  /* 한지 (족자·모달 바탕) */
+  --hanji: #f3ead6;            --hanji-rgb: 243, 234, 214;
   --hanji-deep: #e9dcc0;
   --hanji-edge: #c8b690;
+
+  /* 먹 글씨 (한지 위) — 진한 순 */
+  --ink-strong: #1f1812;
   --ink: #231a12;
   --ink-body: #3a2f24;
+  --ink-muted: #4a3c2e;
   --ink-soft: #6b4f33;
+  --ink-label: #7a5a2c;                                /* 족자 속 항목 이름 */
+  --ink-line: #b89a63;                                 /* 족자 속 테두리 */
 
   /* 나무 축 */
   --wood-light: #6b4526;
+  --wood-mid: #3b2615;
   --wood-dark: #2a1a0e;
 
   /* 주홍 (낙관·강조) */
-  --vermilion: #b3261e;
+  --vermilion: #b3261e;        --vermilion-rgb: 179, 38, 30;
   --vermilion-dark: #8f1d16;
   --vermilion-ink: #a33a2c;
+  --seal-border: #d9463b;
+  --seal-text: #f7ecdc;
 
-  /* 강조색 — 놋쇠 */
-  --accent: #c9a45c;
+  /* 놋쇠 (강조색) */
+  --accent: #c9a45c;           --accent-rgb: 201, 164, 92;
   --accent-light: #e0c283;
   --accent-pale: #f1e2bd;
-  --accent-dark: #8a6d33;
-  --accent-tint: rgba(201, 164, 92, 0.1);
-  --accent-border: rgba(201, 164, 92, 0.4);
-  --accent-glow: rgba(201, 164, 92, 0.3);
+  --accent-dark: #8a6d33;      --accent-dark-rgb: 138, 109, 51;
+  --accent-tint: rgba(var(--accent-rgb), 0.1);
+  --accent-border: rgba(var(--accent-rgb), 0.4);
+  --accent-glow: rgba(var(--accent-rgb), 0.3);
 
-  /* 경고 */
-  --danger: #ef4444;
+  /* 버튼 (먹빛 그라디언트) */
+  --btn-top-rgb: 28, 24, 20;
+  --btn-bottom-rgb: 16, 13, 11;
+
+  /* 지도 위 거점 강조 광채 */
+  --marker-glow: #f59e0b;      --marker-glow-rgb: 245, 158, 11;
+
+  /* 경고 / 괴수 */
+  --danger: #ef4444;           --danger-rgb: 239, 68, 68;
   --danger-light: #fca5a5;
+  --alert-rgb: 120, 22, 16;                            /* 야간 경고 배너 */
+  --alert-border: #e0685c;
+  --alert-text: #fee2e2;
+  --monster-body: #450a0a;
+  --monster-eye: #fef08a;
+
+  /* 야간 (달빛) */
+  --night-tint: #4a5f94;                               /* 지도에 곱해지는 달빛 남색 */
+  --night-label: #e9eef7;
+  --night-sublabel: #9fb6d6;
+  --night-halo-rgb: 5, 8, 16;
+  --night-btn-border: #818cf8;
+  --night-btn-text: #c7d2fe;
+  --night-btn-top-rgb: 30, 27, 75;
+  --night-btn-bottom-rgb: 15, 23, 42;
+
+  /* 인트로 (안개) — js/intro.js 의 안개 입자도 이 값을 읽어 갑니다 */
+  --intro-bg: #080706;
+  --intro-title: #f3eee3;
+  --curtain-rgb: 24, 21, 18;
+  --curtain-edge: #090806;
+  --fog-light-rgb: 52, 46, 38;
+  --fog-mid-rgb: 30, 26, 22;
+  --fog-particle-core-rgb: 40, 36, 32;
+  --fog-particle-mid-rgb: 22, 19, 16;
 
   --border-subtle: rgba(255, 255, 255, 0.08);
 
@@ -85,6 +138,21 @@ button {
   display: none !important;
 }
 
+/* 아이콘 (index.html 상단의 <symbol> 모음을 <use> 로 불러 씀) */
+.icon-sprite {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+.icon {
+  width: 1.15em;
+  height: 1.15em;
+  flex-shrink: 0;
+  vertical-align: -0.2em;
+}
+
 /* 키보드 포커스 표시 (마우스 클릭 시에는 표시 안 함) */
 :focus-visible {
   outline: 2px solid var(--accent-light);
@@ -93,8 +161,8 @@ button {
 
 /* 스크롤바 커스텀 */
 ::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: rgba(20, 17, 14, 0.8); }
-::-webkit-scrollbar-thumb { background: #3a2f24; border-radius: 3px; }
+::-webkit-scrollbar-track { background: rgba(var(--ink-panel-rgb), 0.8); }
+::-webkit-scrollbar-thumb { background: var(--ink-body); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
 
 /* 낙관(푸른색 전각 도장) 공통 스타일 */
@@ -106,8 +174,8 @@ button {
   width: 28px;
   height: 28px;
   background: var(--vermilion);
-  color: #f7ecdc;
-  border: 1.5px solid #d9463b;
+  color: var(--seal-text);
+  border: 1.5px solid var(--seal-border);
   border-radius: 3px;
   font-family: var(--font-serif);
   font-weight: 700;
@@ -119,9 +187,9 @@ button {
 
 /* 동양풍 버튼 스타일 */
 .btn-oriental {
-  background: linear-gradient(180deg, rgba(28, 24, 20, 0.92) 0%, rgba(16, 13, 11, 0.96) 100%);
-  color: #e9dfcc;
-  border: 1px solid rgba(201, 164, 92, 0.45);
+  background: linear-gradient(180deg, rgba(var(--btn-top-rgb), 0.92) 0%, rgba(var(--btn-bottom-rgb), 0.96) 100%);
+  color: var(--text-button);
+  border: 1px solid rgba(var(--accent-rgb), 0.45);
   padding: 8px 18px;
   font-family: var(--font-sans);
   font-size: 13px;
@@ -147,7 +215,7 @@ button {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(201, 164, 92, 0.18), transparent);
+  background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb), 0.18), transparent);
   transition: left 0.5s;
 }
 
@@ -181,7 +249,7 @@ button {
 
 .btn-close:hover,
 .btn-close:focus-visible {
-  background: rgba(201, 164, 92, 0.2);
+  background: rgba(var(--accent-rgb), 0.2);
   transform: rotate(90deg);
   border-color: var(--accent);
   color: var(--accent-pale);
@@ -196,7 +264,7 @@ button {
 
 .btn-close.on-hanji:hover,
 .btn-close.on-hanji:focus-visible {
-  background: rgba(179, 38, 30, 0.1);
+  background: rgba(var(--vermilion-rgb), 0.1);
   border-color: var(--vermilion);
   color: var(--vermilion);
 }
@@ -208,7 +276,7 @@ button {
   position: fixed;
   inset: 0;
   z-index: 500;
-  background: rgba(10, 8, 6, 0.85);
+  background: rgba(var(--backdrop-rgb), 0.85);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   display: flex;
@@ -243,12 +311,12 @@ button {
 
 .modal-header {
   padding: 18px 24px;
-  border-bottom: 1px solid rgba(138, 109, 51, 0.4);
+  border-bottom: 1px solid rgba(var(--accent-dark-rgb), 0.4);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  background: rgba(138, 109, 51, 0.12);
+  background: rgba(var(--accent-dark-rgb), 0.12);
 }
 
 .modal-header h2 {

@@ -7,7 +7,7 @@
   width: 100vw;
   height: var(--vh-full);
   overflow: hidden;
-  background: #14110e;
+  background: var(--bg-map);
 }
 
 /* 지도 뷰포트 */
@@ -41,7 +41,7 @@
   height: 1400px;
   transform-origin: 0 0;
   /* transform 은 JS 가 매 프레임 직접 지정 — CSS transition 을 두면 입력이 밀립니다 */
-  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.85), 0 0 0 1px var(--border-subtle);
   border-radius: 2px;
 }
 
@@ -65,7 +65,7 @@
   height: 110px;
   z-index: 99;
   pointer-events: none;
-  background: linear-gradient(180deg, rgba(14, 12, 10, 0.9) 0%, rgba(14, 12, 10, 0.6) 45%, rgba(14, 12, 10, 0) 100%);
+  background: linear-gradient(180deg, rgba(var(--bg-rgb), 0.9) 0%, rgba(var(--bg-rgb), 0.6) 45%, rgba(var(--bg-rgb), 0) 100%);
 }
 
 @media (max-width: 640px) {
@@ -95,8 +95,8 @@
   font-weight: 400;
   letter-spacing: 8px;
   padding-left: 8px;
-  color: #efe6d6;
-  text-shadow: 0 0 16px rgba(201, 164, 92, 0.35), 0 1px 6px rgba(0, 0, 0, 0.9);
+  color: var(--text-main);
+  text-shadow: 0 0 16px rgba(var(--accent-rgb), 0.35), 0 1px 6px rgba(0, 0, 0, 0.9);
   white-space: nowrap;
 }
 
@@ -111,9 +111,9 @@
 }
 
 #btn-daynight[aria-pressed="true"] {
-  border-color: #818cf8;
-  background: linear-gradient(180deg, rgba(30, 27, 75, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%);
-  color: #c7d2fe;
+  border-color: var(--night-btn-border);
+  background: linear-gradient(180deg, rgba(var(--night-btn-top-rgb), 0.9) 0%, rgba(var(--night-btn-bottom-rgb), 0.95) 100%);
+  color: var(--night-btn-text);
 }
 
 /* ==========================================================================
@@ -127,7 +127,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  background: rgba(20, 17, 14, 0.75);
+  background: rgba(var(--ink-panel-rgb), 0.75);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   border: 1px solid var(--border-subtle);
@@ -180,7 +180,7 @@
   transform: none;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
   border-color: var(--accent-border);
-  color: #e9dfcc;
+  color: var(--text-button);
 }
 
 .btn-zoom:disabled::before { display: none; }
@@ -214,7 +214,7 @@
 .scroll-rod {
   flex-shrink: 0;
   height: 16px;
-  background: linear-gradient(180deg, var(--wood-light) 0%, #3b2615 60%, var(--wood-dark) 100%);
+  background: linear-gradient(180deg, var(--wood-light) 0%, var(--wood-mid) 60%, var(--wood-dark) 100%);
   border-radius: 8px;
   position: relative;
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.6);
@@ -266,13 +266,13 @@
 .panel-direction-badge {
   display: inline-block;
   font-size: 11px;
-  color: #7a5a2c;
+  color: var(--ink-label);
   letter-spacing: 1px;
-  border: 1px solid #b89a63;
+  border: 1px solid var(--ink-line);
   padding: 2px 8px;
   margin-bottom: 8px;
   border-radius: 2px;
-  background: rgba(138, 109, 51, 0.08);
+  background: rgba(var(--accent-dark-rgb), 0.08);
 }
 
 .panel-title-wrap {
@@ -287,7 +287,7 @@
   font-size: 28px;
   font-weight: 900;
   letter-spacing: 3px;
-  color: #1f1812;
+  color: var(--ink-strong);
   line-height: 1.3;
 }
 
@@ -300,8 +300,8 @@
 .panel-landmark {
   margin-bottom: 14px;
   padding: 10px 12px;
-  background: rgba(179, 38, 30, 0.06);
-  border: 1px solid rgba(179, 38, 30, 0.35);
+  background: rgba(var(--vermilion-rgb), 0.06);
+  border: 1px solid rgba(var(--vermilion-rgb), 0.35);
   border-radius: 4px;
 }
 
@@ -313,7 +313,7 @@
 .panel-landmark-name {
   font-size: 16px;
   font-weight: 700;
-  color: #1f1812;
+  color: var(--ink-strong);
 }
 
 .panel-landmark-name span {
@@ -324,15 +324,15 @@
 
 .panel-landmark-desc {
   font-size: 12px;
-  color: #4a3c2e;
+  color: var(--ink-muted);
   margin-top: 4px;
 }
 
 /* 요약 인용 (한글에는 이탤릭이 없으므로 기울이지 않습니다) */
 .panel-summary-quote {
   font-size: 13px;
-  color: #4a3c2e;
-  background: rgba(138, 109, 51, 0.08);
+  color: var(--ink-muted);
+  background: rgba(var(--accent-dark-rgb), 0.08);
   border-left: 3px solid var(--vermilion);
   padding: 10px 14px;
   margin-bottom: 16px;
@@ -345,8 +345,8 @@
   border-collapse: collapse;
   margin: 16px 0;
   font-size: 12px;
-  border-top: 1px dashed rgba(138, 109, 51, 0.4);
-  border-bottom: 1px dashed rgba(138, 109, 51, 0.4);
+  border-top: 1px dashed rgba(var(--accent-dark-rgb), 0.4);
+  border-bottom: 1px dashed rgba(var(--accent-dark-rgb), 0.4);
 }
 
 .panel-meta-table th,
@@ -357,7 +357,7 @@
 }
 
 .panel-meta-table th {
-  color: #7a5a2c;
+  color: var(--ink-label);
   width: 80px;
   font-weight: 600;
 }
@@ -418,15 +418,20 @@
   font-size: 12px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  background: rgba(138, 109, 51, 0.1);
-  border: 1px solid rgba(138, 109, 51, 0.4);
-  color: #4a3c2e;
+  gap: 10px;
+  background: rgba(var(--accent-dark-rgb), 0.1);
+  border: 1px solid rgba(var(--accent-dark-rgb), 0.4);
+  color: var(--ink-muted);
+}
+
+.panel-notice .icon {
+  width: 18px;
+  height: 18px;
 }
 
 .panel-notice.is-night {
-  background: rgba(179, 38, 30, 0.1);
-  border-color: rgba(179, 38, 30, 0.45);
+  background: rgba(var(--vermilion-rgb), 0.1);
+  border-color: rgba(var(--vermilion-rgb), 0.45);
   color: var(--vermilion-dark);
 }
 
@@ -469,7 +474,7 @@
 .map-text {
   font-family: var(--font-serif);
   paint-order: stroke fill;
-  stroke: rgba(243, 234, 214, 0.85);
+  stroke: rgba(var(--hanji-rgb), 0.85);
   stroke-width: 3.5px;
   stroke-linejoin: round;
   transition: fill 0.8s ease, stroke 0.8s ease;
@@ -509,7 +514,7 @@
 }
 
 .stamp-box {
-  fill: rgba(243, 234, 214, 0.85);
+  fill: rgba(var(--hanji-rgb), 0.85);
   stroke: var(--accent-dark);
   stroke-width: 1;
 }
@@ -549,7 +554,7 @@
 .map-marker:focus-visible .marker-pin,
 .map-marker.is-selected .marker-pin {
   transform: scale(1.3);
-  filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.95));
+  filter: drop-shadow(0 0 10px rgba(var(--marker-glow-rgb), 0.95));
 }
 
 .marker-label {
@@ -578,7 +583,7 @@
   left: 0;
   z-index: 300;
   pointer-events: none;
-  background: rgba(20, 17, 14, 0.92);
+  background: rgba(var(--ink-panel-rgb), 0.92);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   border: 1px solid var(--accent);
@@ -602,7 +607,7 @@
    ========================================================================== */
 
 #main-screen.night-mode {
-  background: #0b0907;
+  background: var(--bg-night);
 }
 
 /* 필터는 배경 이미지 한 곳에만 — 마커·지명은 밤에도 선명하게 유지됩니다 */
@@ -616,6 +621,7 @@
 }
 
 #night-tint {
+  fill: var(--night-tint);
   mix-blend-mode: multiply;
   opacity: 0;
   pointer-events: none;
@@ -628,25 +634,34 @@
 
 /* 밤에는 지명을 밝은 글씨 + 어두운 외곽선으로 */
 #main-screen.night-mode .map-text {
-  stroke: rgba(5, 8, 16, 0.75);
+  stroke: rgba(var(--night-halo-rgb), 0.75);
 }
 
 #main-screen.night-mode .region-label,
 #main-screen.night-mode .marker-label {
-  fill: #e9eef7;
+  fill: var(--night-label);
 }
 
 #main-screen.night-mode .region-sublabel {
-  fill: #9fb6d6;
+  fill: var(--night-sublabel);
+}
+
+/* 밤에는 괴수 실루엣이 황해 부제(荒海) 자리를 덮으므로 숨김 */
+.region-sublabel[data-region="hwanghae"] {
+  transition: opacity 0.8s ease;
+}
+
+#main-screen.night-mode .region-sublabel[data-region="hwanghae"] {
+  opacity: 0;
 }
 
 #main-screen.night-mode .map-marker:hover .marker-label,
 #main-screen.night-mode .map-marker.is-selected .marker-label {
-  fill: #fca5a5;
+  fill: var(--danger-light);
 }
 
 #main-screen.night-mode .stamp-box {
-  fill: rgba(20, 17, 14, 0.8);
+  fill: rgba(var(--ink-panel-rgb), 0.8);
 }
 
 /* 주간 뱃길: 밤에는 닫힘 */
@@ -657,6 +672,17 @@
 #main-screen.night-mode #day-shipping-route {
   opacity: 0;
 }
+
+/* SVG 필터·괴수 색 (index.html 의 SVG 도 색은 CSS 변수로) */
+/* 지도 위 라벨 아이콘 (위치는 js 의 layoutMapIcons 가 맞춤) */
+.map-icon { pointer-events: none; }
+.route-icon { color: var(--vermilion-dark); }
+.monster-icon { color: var(--danger-light); }
+
+#marker-glow feDropShadow { flood-color: var(--marker-glow); }
+#red-glow feDropShadow { flood-color: var(--danger); }
+.monster-body { fill: var(--monster-body); stroke: var(--danger); }
+.monster-eye { fill: var(--monster-eye); }
 
 /* 황해 괴수: 밤에만 등장, 클릭 시 '황해 중심 소용돌이' 열람 */
 #monster-group {
@@ -676,8 +702,8 @@
 }
 
 @keyframes monsterPulse {
-  0% { transform: scale(0.97) rotate(-1deg); filter: drop-shadow(0 0 10px rgba(239, 68, 68, 0.4)); }
-  100% { transform: scale(1.03) rotate(1deg); filter: drop-shadow(0 0 25px rgba(239, 68, 68, 0.9)); }
+  0% { transform: scale(0.97) rotate(-1deg); filter: drop-shadow(0 0 10px rgba(var(--danger-rgb), 0.4)); }
+  100% { transform: scale(1.03) rotate(1deg); filter: drop-shadow(0 0 25px rgba(var(--danger-rgb), 0.9)); }
 }
 
 /* 야간 경고 배너 */
@@ -687,9 +713,9 @@
   left: 50%;
   transform: translateX(-50%);
   max-width: calc(100vw - 32px);
-  background: rgba(120, 22, 16, 0.92);
-  border: 1px solid #e0685c;
-  color: #fee2e2;
+  background: rgba(var(--alert-rgb), 0.92);
+  border: 1px solid var(--alert-border);
+  color: var(--alert-text);
   padding: 8px 24px;
   border-radius: 20px;
   font-size: 13px;
@@ -697,7 +723,7 @@
   letter-spacing: 2px;
   text-align: center;
   z-index: 120;
-  box-shadow: 0 0 25px rgba(239, 68, 68, 0.5);
+  box-shadow: 0 0 25px rgba(var(--danger-rgb), 0.5);
   display: none;
   align-items: center;
   gap: 8px;

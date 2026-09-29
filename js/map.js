@@ -14,6 +14,11 @@ function escapeHtml(value) {
     .replace(/'/g, '&#39;');
 }
 
+// 아이콘 스프라이트(index.html 의 <symbol>)를 쓰는 인라인 SVG 문자열
+function iconHtml(name) {
+  return `<svg class="icon" aria-hidden="true"><use href="#i-${name}"/></svg>`;
+}
+
 function svgEl(tag, attrs = {}) {
   const el = document.createElementNS(SVG_NS, tag);
   for (const [key, val] of Object.entries(attrs)) {
@@ -63,6 +68,9 @@ class FantasyMap {
     this.canHover = window.matchMedia('(hover: hover)');   // 터치 기기에서는 호버 툴팁 생략
 
     this.buildMap();
+    this.layoutMapIcons();
+    // 웹폰트가 늦게 도착하면 글자 폭이 바뀌므로 한 번 더 맞춥니다
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => this.layoutMapIcons());
     this.fitToScreen();
     this.bindPointerEvents();
     this.bindWheel();
@@ -104,7 +112,7 @@ class FantasyMap {
         });
         title.textContent = region.name.split('').join(' ');
         const subtitle = svgEl('text', {
-          x, y: y + (size >= 24 ? 25 : 23), class: 'map-text region-sublabel', 'text-anchor': 'middle'
+          x, y: y + (size >= 24 ? 25 : 23), class: 'map-text region-sublabel', 'text-anchor': 'middle', 'data-region': region.id
         });
         subtitle.textContent = region.hanja;
         labelsLayer.append(title, subtitle);
@@ -126,6 +134,24 @@ class FantasyMap {
         return;
       }
       if (lm.pin) markersLayer.appendChild(this.createMarker(lm));
+    });
+  }
+
+  // 지도 위 라벨 앞에 아이콘(<use class="map-icon">)을 붙이고, 아이콘+글자 묶음이 원래 중심에 오도록 정렬
+  layoutMapIcons() {
+    document.querySelectorAll('#fantasy-map .map-icon').forEach((icon) => {
+      const text = icon.previousElementSibling;
+      if (!text || text.tagName !== 'text') return;
+      if (!text.dataset.cx) text.dataset.cx = text.getAttribute('x');
+      const size = parseFloat(icon.getAttribute('width'));
+      const gap = 4;
+      const cx = parseFloat(text.dataset.cx);
+      const box = text.getBBox();
+      if (!box.width) return;                       // 아직 그려지지 않음
+      text.setAttribute('x', cx + (size + gap) / 2);
+      const startX = cx - (box.width + size + gap) / 2;
+      icon.setAttribute('x', startX);
+      icon.setAttribute('y', box.y + (box.height - size) / 2);
     });
   }
 
@@ -613,7 +639,7 @@ class FantasyMap {
       const night = this.isNight;
       noticeHtml = `
         <div class="panel-notice${night ? ' is-night' : ''}">
-          <span aria-hidden="true">${night ? '⚠️' : '⚓'}</span>
+          ${iconHtml(night ? 'warning' : 'anchor')}
           <div>
             <strong>${night ? '야간 해수(괴수) 출몰 경고' : '주간 항해 안내'}:</strong><br>
             ${e(night ? data.notice.night : data.notice.day)}
@@ -690,11 +716,12 @@ class FantasyMap {
     this.mainScreen.classList.toggle('night-mode', this.isNight);
 
     this.dayNightBtn.setAttribute('aria-pressed', String(this.isNight));
-    this.dayNightBtn.textContent = this.isNight ? '🌙 야간' : '☀️ 주간';
+    this.dayNightBtn.querySelector('use').setAttribute('href', this.isNight ? '#i-moon' : '#i-sun');
+    this.dayNightBtn.querySelector('.btn-label').textContent = this.isNight ? '야간' : '주간';
 
     // 스크린리더에 알리도록 배너 문구는 야간 전환 시에만 채웁니다
-    this.nightBanner.textContent = this.isNight
-      ? '⚠️ [ 야간 경보 ] 황해 심해 괴수 출몰 중! 야간 해상 횡단 절대 불가'
+    this.nightBanner.innerHTML = this.isNight
+      ? `${iconHtml('warning')}<span>[ 야간 경보 ] 황해 심해 괴수 출몰 중! 야간 해상 횡단 절대 불가</span>`
       : '';
 
     // 괴수는 야간에만 키보드로 선택 가능
