@@ -1,0 +1,215 @@
+/* ==========================================================================
+   황량계(荒涼界) 공통 스타일 및 테마 정의
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Noto+Serif+KR:wght@300;400;600;700;900&display=swap');
+
+:root {
+  /* 동양 판타지 테마 색상 팔레트 - 황량계 푸른빛 테마 */
+  --bg-deep: #070a10;
+  --bg-ink: #0c121c;
+  --bg-parchment: #121a28;
+  --text-main: #e8ecf4;
+  --text-dim: #9ba8ba;
+  --text-muted: #64748b;
+  --gold-primary: #38bdf8;
+  --gold-light: #7dd3fc;
+  --gold-dark: #0284c7;
+  --crimson-seal: #0f233d;
+  --crimson-bright: #38bdf8;
+  --jade-green: #10b981;
+  --ghost-cyan: #38bdf8;
+  --border-gold: rgba(56, 189, 248, 0.35);
+  --border-subtle: rgba(255, 255, 255, 0.08);
+
+  /* 폰트: Noto Serif KR & Noto Sans KR 통일 */
+  --font-serif: 'Noto Serif KR', serif;
+  --font-sans: 'Noto Sans KR', sans-serif;
+  --font-title: 'Noto Serif KR', serif;
+  --font-deco: 'Noto Serif KR', serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--bg-deep);
+  color: var(--text-main);
+  font-family: var(--font-serif);
+  line-height: 1.6;
+}
+
+/* 스크롤바 커스텀 */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(10, 14, 20, 0.8);
+}
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #38bdf8;
+}
+
+/* 낙관(푸른색 전각 도장) 공통 스타일 */
+.seal-stamp {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: #0f233d;
+  color: #7dd3fc;
+  border: 1.5px solid rgba(56, 189, 248, 0.6);
+  border-radius: 4px;
+  font-family: var(--font-title);
+  font-weight: 700;
+  font-size: 13px;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.35);
+  letter-spacing: 0;
+  vertical-align: middle;
+}
+
+/* 동양풍 버튼 스타일 (푸른빛 테마) */
+.btn-oriental {
+  background: linear-gradient(180deg, rgba(16, 26, 42, 0.85) 0%, rgba(10, 16, 28, 0.95) 100%);
+  color: #e2e8f0;
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  padding: 8px 18px;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+}
+
+.btn-oriental::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.2), transparent);
+  transition: 0.5s;
+}
+
+.btn-oriental:hover::before {
+  left: 100%;
+}
+
+.btn-oriental:hover {
+  border-color: #38bdf8;
+  box-shadow: 0 0 18px rgba(56, 189, 248, 0.45);
+  color: #bae6fd;
+  transform: translateY(-1px);
+}
+
+.btn-oriental.active {
+  background: linear-gradient(180deg, rgba(14, 45, 75, 0.9) 0%, rgba(10, 25, 45, 0.95) 100%);
+  border-color: #38bdf8;
+  color: #bae6fd;
+  box-shadow: 0 0 16px rgba(56, 189, 248, 0.4);
+}
+
+/* ==========================================================================
+   세계관 및 등장인물 모달 (Modal)
+   ========================================================================== */
+#lore-modal,
+#characters-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 500;
+  background: rgba(4, 6, 10, 0.85);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+#lore-modal.visible,
+#characters-modal.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-scroll-card {
+  width: min(720px, 92vw);
+  max-height: 85vh;
+  background: linear-gradient(180deg, #141a24 0%, #0c1017 100%);
+  border: 1px solid rgba(56, 189, 248, 0.5);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 30px rgba(56, 189, 248, 0.2);
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.modal-header {
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--border-gold);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(25, 30, 42, 0.6);
+}
+
+.modal-header h3 {
+  font-size: 20px;
+  color: var(--gold-light);
+  letter-spacing: 2px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.modal-body {
+  padding: 24px 28px;
+  overflow-y: auto;
+  font-size: 14px;
+  line-height: 1.8;
+  color: #e2e8f0;
+}
+
+.modal-body h4 {
+  color: var(--gold-primary);
+  font-size: 16px;
+  margin: 18px 0 8px;
+  letter-spacing: 1px;
+}
+
+.modal-body ul {
+  padding-left: 20px;
+  margin-bottom: 12px;
+  color: #cbd5e1;
+}
+
+.modal-body li {
+  margin-bottom: 6px;
+}
+

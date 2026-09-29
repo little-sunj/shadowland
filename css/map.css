@@ -1,0 +1,506 @@
+/* ==========================================================================
+   황량계(荒涼界) 메인 지도 및 족자 HUD 패널 스타일
+   ========================================================================== */
+
+#main-screen {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: #090c12;
+  transition: filter 1s ease;
+}
+
+/* 지도 뷰포트 */
+#map-viewport {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  cursor: grab;
+}
+
+#map-viewport:active {
+  cursor: grabbing;
+}
+
+#map-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1400px;
+  height: 1400px;
+  transform-origin: 0 0;
+  transition: transform 0.08s linear;
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  border-radius: 2px;
+}
+
+/* SVG 판타지 지도 */
+#fantasy-map {
+  width: 100%;
+  height: 100%;
+  display: block;
+  filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.8));
+}
+
+/* 상단 네비게이션 HUD */
+.top-hud {
+  position: absolute;
+  top: 20px;
+  left: 24px;
+  right: 24px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+.top-hud > * {
+  pointer-events: auto;
+}
+
+.brand-section {
+  display: flex;
+  align-items: center;
+  background: transparent;
+  padding: 0;
+  border: none;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.brand-title {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 400; /* Noto Serif KR 얇은 굵기 */
+  letter-spacing: 8px;
+  padding-left: 8px;
+  color: #f1f5f9;
+  text-shadow: 0 0 16px rgba(56, 189, 248, 0.35);
+}
+
+/* 우측 유틸리티 컨트롤 */
+.util-controls {
+  display: flex;
+  gap: 8px;
+}
+
+/* 주야간 모드 버튼 */
+#btn-daynight {
+  border-color: #f59e0b;
+}
+
+#btn-daynight.night {
+  border-color: #818cf8;
+  background: linear-gradient(180deg, rgba(30, 27, 75, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%);
+  color: #c7d2fe;
+}
+
+/* 지도 조작 안내 힌트 */
+.map-hint {
+  position: absolute;
+  bottom: 24px;
+  left: 24px;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(14, 18, 25, 0.75);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--border-subtle);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  color: var(--text-dim);
+  pointer-events: none;
+}
+
+.hint-badge {
+  color: var(--gold-primary);
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   동양풍 족자(Scroll) 정보 안내 패널
+   ========================================================================== */
+
+#info-panel {
+  position: absolute;
+  right: 28px;
+  bottom: 28px;
+  width: 440px;
+  max-height: calc(100vh - 120px);
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  transform: translateY(30px) scale(0.96);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  filter: drop-shadow(0 15px 35px rgba(0, 0, 0, 0.85));
+}
+
+#info-panel.active {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+  visibility: visible;
+}
+
+/* 족자 상/하단 축목 (Wooden Rod) */
+.scroll-rod {
+  height: 14px;
+  background: linear-gradient(90deg, #0d1522 0%, #1e3a5f 50%, #0d1522 100%);
+  border-radius: 4px;
+  position: relative;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.8);
+}
+
+.scroll-rod::before,
+.scroll-rod::after {
+  content: '';
+  position: absolute;
+  top: -3px;
+  width: 14px;
+  height: 20px;
+  background: #38bdf8;
+  border-radius: 2px;
+  box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.6);
+}
+.scroll-rod::before { left: -6px; }
+.scroll-rod::after { right: -6px; }
+
+/* 족자 비단 테두리 & 한지 본문 */
+.scroll-body {
+  background: 
+    linear-gradient(180deg, rgba(14, 20, 30, 0.98) 0%, rgba(9, 13, 20, 0.98) 100%);
+  border-left: 10px solid #101726;
+  border-right: 10px solid #101726;
+  padding: 24px 28px;
+  overflow-y: auto;
+  position: relative;
+  color: #e2e8f0;
+  border-top: 1px solid rgba(56, 189, 248, 0.4);
+  border-bottom: 1px solid rgba(56, 189, 248, 0.4);
+}
+
+/* 족자 닫기 버튼 */
+.btn-close-scroll {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  background: transparent;
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  color: #38bdf8;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.btn-close-scroll:hover {
+  background: rgba(56, 189, 248, 0.2);
+  transform: rotate(90deg);
+  border-color: #38bdf8;
+  color: #bae6fd;
+}
+
+/* 패널 헤더 */
+.panel-header {
+  margin-bottom: 16px;
+  padding-right: 32px;
+}
+
+.panel-direction-badge {
+  display: inline-block;
+  font-size: 11px;
+  color: var(--gold-primary);
+  letter-spacing: 2px;
+  border: 1px solid var(--gold-dark);
+  padding: 2px 8px;
+  margin-bottom: 8px;
+  border-radius: 2px;
+  background: rgba(212, 175, 55, 0.08);
+}
+
+.panel-title-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.panel-name {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  color: #fff4e0;
+}
+
+.panel-hanja {
+  font-size: 18px;
+  color: var(--gold-primary);
+  opacity: 0.85;
+}
+
+.panel-category {
+  font-size: 13px;
+  color: #cbd5e1;
+  letter-spacing: 1px;
+}
+
+/* 세력 및 위험도 메타정보 테이블 */
+.panel-meta-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 12px;
+  border-top: 1px dashed rgba(56, 189, 248, 0.25);
+  border-bottom: 1px dashed rgba(56, 189, 248, 0.25);
+}
+
+.panel-meta-table td {
+  padding: 8px 6px;
+  vertical-align: top;
+}
+
+.panel-meta-table .meta-label {
+  color: var(--gold-primary);
+  width: 80px;
+  font-weight: 600;
+}
+
+.panel-meta-table .meta-val {
+  color: #e2e8f0;
+}
+
+/* 요약 배너 */
+.panel-summary-quote {
+  font-size: 13px;
+  font-style: italic;
+  color: var(--gold-light);
+  background: rgba(56, 189, 248, 0.08);
+  border-left: 3px solid var(--gold-primary);
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  line-height: 1.6;
+}
+
+/* 상세 본문 */
+.panel-desc {
+  font-size: 13px;
+  line-height: 1.8;
+  color: #d8cfc4;
+  margin-bottom: 20px;
+  white-space: pre-line;
+}
+
+/* 특징 목록 */
+.panel-traits-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--gold-primary);
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+
+.panel-traits-list {
+  list-style: none;
+  font-size: 12px;
+  color: #cbd5e1;
+}
+
+.panel-traits-list li {
+  position: relative;
+  padding-left: 16px;
+  margin-bottom: 6px;
+  line-height: 1.5;
+}
+
+.panel-traits-list li::before {
+  content: '◈';
+  position: absolute;
+  left: 0;
+  color: var(--gold-primary);
+  font-size: 10px;
+}
+
+/* 특수 경고 박스 (황해 밤바다 경고 등) */
+.panel-warning {
+  margin-top: 16px;
+  padding: 10px 14px;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  border-radius: 4px;
+  font-size: 12px;
+  color: #fca5a5;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ==========================================================================
+   지도 인터랙션 (호버 구역, 핀 마커, 툴팁)
+   ========================================================================== */
+
+/* 영역 폴리곤 (순수 투명 클릭/호버 감지용 - 마우스 오버 시 색상/테두리 일체 미표시) */
+.region-polygon {
+  cursor: pointer;
+  fill: rgba(0, 0, 0, 0.001) !important;
+  fill-opacity: 0.001 !important;
+  stroke: transparent !important;
+  stroke-width: 0 !important;
+  pointer-events: all;
+  filter: none !important;
+}
+
+.region-polygon:hover,
+.region-polygon.active {
+  fill: rgba(0, 0, 0, 0.001) !important;
+  fill-opacity: 0.001 !important;
+  stroke: transparent !important;
+  stroke-width: 0 !important;
+  filter: none !important;
+}
+
+/* 거점 핀 마커 (호버 시 흔들림 방지 구조) */
+.map-marker {
+  cursor: pointer;
+}
+
+.map-marker .marker-hitbox {
+  fill: transparent;
+  pointer-events: all;
+}
+
+.map-marker .marker-pin {
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.25s ease;
+  transform-origin: 0 0;
+}
+
+.map-marker:hover .marker-pin {
+  transform: scale(1.3);
+  filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.95));
+}
+
+.marker-label {
+  font-family: var(--font-serif);
+  font-size: 13px;
+  font-weight: 700;
+  fill: #fff;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.95));
+  pointer-events: none;
+  letter-spacing: 1px;
+  transition: fill 0.2s ease;
+}
+
+.map-marker:hover .marker-label {
+  fill: #fde047;
+}
+
+/* 마우스 추종 미니 툴팁 */
+#map-tooltip {
+  position: fixed;
+  z-index: 300;
+  pointer-events: none;
+  background: rgba(10, 14, 20, 0.92);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--gold-primary);
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #fef08a;
+  letter-spacing: 1px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+  opacity: 0;
+  transition: opacity 0.15s ease, transform 0.1s ease;
+  transform: translate(12px, 12px);
+}
+
+#map-tooltip.visible {
+  opacity: 1;
+}
+
+/* ==========================================================================
+   세계관 고증: 야간 모드 (Night Mode) 연출
+   ========================================================================== */
+
+#main-screen.night-mode {
+  background: #04060a;
+}
+
+#main-screen.night-mode #fantasy-map {
+  filter: brightness(0.72) contrast(1.18) hue-rotate(15deg);
+}
+
+/* 야간 시 황해 변화 */
+#main-screen.night-mode #sea-area {
+  fill: #1e112a !important;
+  stroke: #ef4444 !important;
+  stroke-width: 3;
+}
+
+/* 야간 시 황해 괴수 실루엣 활성화 */
+#monster-group {
+  opacity: 0;
+  transition: opacity 1.2s ease;
+  pointer-events: none;
+}
+
+#main-screen.night-mode #monster-group {
+  opacity: 0.88;
+  animation: monsterPulse 3.5s infinite alternate ease-in-out;
+}
+
+@keyframes monsterPulse {
+  0% { transform: scale(0.97) rotate(-1deg); filter: drop-shadow(0 0 10px rgba(239, 68, 68, 0.4)); }
+  100% { transform: scale(1.03) rotate(1deg); filter: drop-shadow(0 0 25px rgba(239, 68, 68, 0.9)); }
+}
+
+/* 야간 경고 플로팅 배너 */
+.night-warning-banner {
+  position: absolute;
+  top: 84px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(153, 27, 27, 0.9);
+  border: 1px solid #f87171;
+  color: #fee2e2;
+  padding: 8px 24px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  z-index: 120;
+  box-shadow: 0 0 25px rgba(239, 68, 68, 0.5);
+  display: none;
+  animation: pulseWarning 2s infinite ease-in-out;
+}
+
+#main-screen.night-mode .night-warning-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+@keyframes pulseWarning {
+  0%, 100% { opacity: 0.85; transform: translateX(-50%) scale(1); }
+  50% { opacity: 1; transform: translateX(-50%) scale(1.03); }
+}
+
+/* 야간 모드 시 고지도 이미지 블루문 감성 필터 전환 */
+#map-bg-image {
+  transition: filter 0.8s ease;
+}
+
+#main-screen.night-mode #map-bg-image {
+  filter: brightness(0.65) contrast(1.15) hue-rotate(185deg) saturate(1.1);
+}

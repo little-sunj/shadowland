@@ -1,0 +1,220 @@
+/* ==========================================================================
+   황량계 인트로 안개 및 좌우 걷힘(Parting) 연출 스타일
+   ========================================================================== */
+
+#intro-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  cursor: pointer;
+  background-color: #050608;
+  transition: visibility 2s cubic-bezier(0.16, 1, 0.3, 1), opacity 2s ease;
+}
+
+/* 안개 캔버스 (실시간 파티클 흐름) */
+#mist-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0.92;
+  transition: opacity 1.8s ease;
+}
+
+/* 좌우 구름 장막 (Parting Curtains) - 중앙 이음새(Seam) 완전 제거 */
+.curtain-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.cloud-curtain {
+  position: absolute;
+  top: 0;
+  width: 60%;
+  height: 100%;
+  background: radial-gradient(ellipse at 50% 50%, rgba(18, 24, 34, 0.98) 0%, rgba(10, 12, 18, 0.99) 60%, #06080b 100%);
+  transition: transform 2.2s cubic-bezier(0.25, 1, 0.5, 1), opacity 1.8s ease, filter 2s ease;
+}
+
+/* 좌측 안개 장막: 중앙 경계선에 200px 부드러운 알파 마스크 페더링 적용 */
+.curtain-left {
+  left: 0;
+  transform-origin: left center;
+  -webkit-mask-image: linear-gradient(to right, #000 0%, #000 calc(100% - 200px), transparent 100%);
+  mask-image: linear-gradient(to right, #000 0%, #000 calc(100% - 200px), transparent 100%);
+}
+
+/* 우측 안개 장막: 중앙 경계선에 200px 부드러운 알파 마스크 페더링 적용 */
+.curtain-right {
+  right: 0;
+  transform-origin: right center;
+  -webkit-mask-image: linear-gradient(to left, #000 0%, #000 calc(100% - 200px), transparent 100%);
+  mask-image: linear-gradient(to left, #000 0%, #000 calc(100% - 200px), transparent 100%);
+}
+
+/* 부유하는 먹구름 텍스처 레이어 (마스크 내부에서 유기적으로 블렌딩) */
+.cloud-texture {
+  position: absolute;
+  width: 150%;
+  height: 150%;
+  top: -25%;
+  left: -25%;
+  background: 
+    radial-gradient(circle at 35% 45%, rgba(35, 45, 65, 0.22) 0%, transparent 60%),
+    radial-gradient(circle at 65% 55%, rgba(22, 28, 40, 0.3) 0%, transparent 60%);
+  filter: blur(40px);
+  animation: cloudDrift 24s infinite alternate ease-in-out;
+  pointer-events: none;
+}
+
+@keyframes cloudDrift {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-3%, 2%) scale(1.05); }
+  100% { transform: translate(3%, -2%) scale(1.02); }
+}
+
+/* 중앙 인트로 콘텐츠 */
+.intro-content {
+  position: relative;
+  z-index: 5;
+  text-align: center;
+  max-width: 720px;
+  padding: 40px;
+  transition: opacity 1.2s ease, transform 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.intro-title {
+  font-family: 'Noto Serif KR', serif;
+  font-size: clamp(34px, 5.5vw, 56px);
+  font-weight: 300; /* 얄쌍하고 섬세한 굵기 */
+  letter-spacing: 42px;
+  padding-left: 42px;
+  color: #f3eee3;
+  text-shadow: 
+    0 0 20px rgba(56, 189, 248, 0.2),
+    0 2px 14px rgba(0, 0, 0, 0.9);
+  margin-bottom: 12px;
+  line-height: 1.2;
+}
+
+.intro-korean,
+.intro-hanja {
+  font-family: 'Noto Serif KR', serif;
+  font-size: clamp(14px, 2vw, 19px);
+  font-weight: 400;
+  color: #38bdf8;
+  letter-spacing: 24px;
+  padding-left: 24px;
+  opacity: 0.85;
+  text-shadow: 0 0 15px rgba(56, 189, 248, 0.45);
+  margin-bottom: 48px; /* 하단 입장 아이콘과의 간격 */
+}
+
+/* 인터랙션 유도 버튼 및 아이콘 */
+.intro-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  cursor: pointer;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.intro-cta:hover {
+  transform: translateY(-2px);
+}
+
+.cta-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  color: #38bdf8;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.16) 0%, rgba(15, 23, 42, 0) 70%);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  animation: ctaPulse 2.4s infinite ease-in-out;
+  transition: all 0.35s ease;
+}
+
+.cta-icon svg {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
+  filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.5));
+  transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.intro-cta:hover .cta-icon {
+  color: #bae6fd;
+  border-color: rgba(56, 189, 248, 0.5);
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.32) 0%, rgba(15, 23, 42, 0) 75%);
+  transform: scale(1.1);
+}
+
+.intro-cta:hover .cta-icon svg {
+  filter: drop-shadow(0 0 16px rgba(56, 189, 248, 0.95));
+}
+
+@keyframes ctaPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.75;
+    box-shadow: 0 0 15px rgba(56, 189, 248, 0.15);
+  }
+  50% {
+    transform: scale(1.08);
+    opacity: 1;
+    box-shadow: 0 0 25px rgba(56, 189, 248, 0.4);
+  }
+}
+
+/* ==========================================================================
+   클릭 시 안개와 구름이 양옆으로 걷히는(Parting) 애니메이션 클래스
+   ========================================================================== */
+#intro-screen.parted {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 1.8s ease 0.4s;
+}
+
+#intro-screen.parted .curtain-left {
+  transform: translateX(-110%) skewX(-3deg);
+  filter: blur(15px);
+  opacity: 0;
+}
+
+#intro-screen.parted .curtain-right {
+  transform: translateX(110%) skewX(3deg);
+  filter: blur(15px);
+  opacity: 0;
+}
+
+#intro-screen.parted .intro-content {
+  opacity: 0;
+  transform: scale(1.15) translateY(-30px);
+}
+
+#intro-screen.parted #mist-canvas {
+  opacity: 0;
+  transform: scale(1.2);
+}
