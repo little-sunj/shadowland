@@ -4,10 +4,7 @@
 
 #intro-screen {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
+  inset: 0;
   z-index: 1000;
   display: flex;
   align-items: center;
@@ -15,29 +12,25 @@
   overflow: hidden;
   cursor: pointer;
   background-color: #050608;
-  transition: visibility 2s cubic-bezier(0.16, 1, 0.3, 1), opacity 2s ease;
+  outline: none;
 }
 
 /* 안개 캔버스 (실시간 파티클 흐름) */
 #mist-canvas {
   position: absolute;
-  top: 0;
-  left: 0;
+  inset: 0;
   width: 100%;
   height: 100%;
   z-index: 2;
   pointer-events: none;
   opacity: 0.92;
-  transition: opacity 1.8s ease;
+  transition: opacity 1.8s ease, transform 1.8s ease;
 }
 
-/* 좌우 구름 장막 (Parting Curtains) - 중앙 이음새(Seam) 완전 제거 */
+/* 좌우 구름 장막 — 중앙 이음새는 알파 마스크 페더링으로 제거 */
 .curtain-container {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   z-index: 1;
   pointer-events: none;
 }
@@ -51,7 +44,6 @@
   transition: transform 2.2s cubic-bezier(0.25, 1, 0.5, 1), opacity 1.8s ease, filter 2s ease;
 }
 
-/* 좌측 안개 장막: 중앙 경계선에 200px 부드러운 알파 마스크 페더링 적용 */
 .curtain-left {
   left: 0;
   transform-origin: left center;
@@ -59,7 +51,6 @@
   mask-image: linear-gradient(to right, #000 0%, #000 calc(100% - 200px), transparent 100%);
 }
 
-/* 우측 안개 장막: 중앙 경계선에 200px 부드러운 알파 마스크 페더링 적용 */
 .curtain-right {
   right: 0;
   transform-origin: right center;
@@ -67,14 +58,14 @@
   mask-image: linear-gradient(to left, #000 0%, #000 calc(100% - 200px), transparent 100%);
 }
 
-/* 부유하는 먹구름 텍스처 레이어 (마스크 내부에서 유기적으로 블렌딩) */
+/* 부유하는 먹구름 텍스처 레이어 */
 .cloud-texture {
   position: absolute;
   width: 150%;
   height: 150%;
   top: -25%;
   left: -25%;
-  background: 
+  background:
     radial-gradient(circle at 35% 45%, rgba(35, 45, 65, 0.22) 0%, transparent 60%),
     radial-gradient(circle at 65% 55%, rgba(22, 28, 40, 0.3) 0%, transparent 60%);
   filter: blur(40px);
@@ -94,51 +85,51 @@
   z-index: 5;
   text-align: center;
   max-width: 720px;
-  padding: 40px;
+  padding: 40px 16px;
   transition: opacity 1.2s ease, transform 1.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .intro-title {
-  font-family: 'Noto Serif KR', serif;
+  font-family: var(--font-serif);
   font-size: clamp(34px, 5.5vw, 56px);
-  font-weight: 300; /* 얄쌍하고 섬세한 굵기 */
-  letter-spacing: 42px;
-  padding-left: 42px;
+  font-weight: 300;
+  /* 좁은 화면에서도 한 줄 유지되도록 자간을 화면폭에 비례시킵니다 */
+  --title-spacing: clamp(14px, 5vw, 42px);
+  letter-spacing: var(--title-spacing);
+  padding-left: var(--title-spacing);
   color: #f3eee3;
-  text-shadow: 
+  text-shadow:
     0 0 20px rgba(56, 189, 248, 0.2),
     0 2px 14px rgba(0, 0, 0, 0.9);
   margin-bottom: 12px;
   line-height: 1.2;
+  white-space: nowrap;
 }
 
-.intro-korean,
-.intro-hanja {
-  font-family: 'Noto Serif KR', serif;
+.intro-korean {
+  font-family: var(--font-serif);
   font-size: clamp(14px, 2vw, 19px);
   font-weight: 400;
-  color: #38bdf8;
-  letter-spacing: 24px;
-  padding-left: 24px;
+  color: var(--accent);
+  --korean-spacing: clamp(10px, 3vw, 24px);
+  letter-spacing: var(--korean-spacing);
+  padding-left: var(--korean-spacing);
   opacity: 0.85;
-  text-shadow: 0 0 15px rgba(56, 189, 248, 0.45);
-  margin-bottom: 48px; /* 하단 입장 아이콘과의 간격 */
+  text-shadow: 0 0 15px var(--accent-glow);
+  margin-bottom: 48px;
 }
 
-/* 인터랙션 유도 버튼 및 아이콘 */
+/* 입장 유도 아이콘 */
 .intro-cta {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: 8px;
-  border: none;
-  background: transparent;
-  box-shadow: none;
-  cursor: pointer;
   transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.intro-cta:hover {
+#intro-screen:hover .intro-cta,
+#intro-screen:focus-visible .intro-cta {
   transform: translateY(-2px);
 }
 
@@ -149,11 +140,11 @@
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  color: #38bdf8;
+  color: var(--accent);
   background: radial-gradient(circle, rgba(56, 189, 248, 0.16) 0%, rgba(15, 23, 42, 0) 70%);
   border: 1px solid rgba(56, 189, 248, 0.25);
   animation: ctaPulse 2.4s infinite ease-in-out;
-  transition: all 0.35s ease;
+  transition: color 0.35s ease, border-color 0.35s ease, background 0.35s ease;
 }
 
 .cta-icon svg {
@@ -161,17 +152,18 @@
   height: 24px;
   fill: currentColor;
   filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.5));
-  transition: transform 0.3s ease, filter 0.3s ease;
+  transition: filter 0.3s ease;
 }
 
-.intro-cta:hover .cta-icon {
-  color: #bae6fd;
+#intro-screen:hover .cta-icon,
+#intro-screen:focus-visible .cta-icon {
+  color: var(--accent-pale);
   border-color: rgba(56, 189, 248, 0.5);
   background: radial-gradient(circle, rgba(56, 189, 248, 0.32) 0%, rgba(15, 23, 42, 0) 75%);
-  transform: scale(1.1);
 }
 
-.intro-cta:hover .cta-icon svg {
+#intro-screen:hover .cta-icon svg,
+#intro-screen:focus-visible .cta-icon svg {
   filter: drop-shadow(0 0 16px rgba(56, 189, 248, 0.95));
 }
 
@@ -189,7 +181,7 @@
 }
 
 /* ==========================================================================
-   클릭 시 안개와 구름이 양옆으로 걷히는(Parting) 애니메이션 클래스
+   클릭 시 안개와 구름이 양옆으로 걷히는(Parting) 애니메이션
    ========================================================================== */
 #intro-screen.parted {
   opacity: 0;

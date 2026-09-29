@@ -11,8 +11,10 @@ class IntroManager {
     this.particles = [];
     this.isParted = false;
     this.animId = null;
+    this.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    if (this.canvas) {
+    if (this.ctx) {
+      this.sprite = this.createFogSprite();
       this.resizeCanvas();
       this.initParticles();
       this.startMistAnimation();
@@ -20,30 +22,74 @@ class IntroManager {
     }
 
     this.bindEvents();
+
+    // 키보드 사용자가 바로 Enter 로 입장할 수 있도록
+    if (this.introScreen) this.introScreen.focus({ preventScroll: true });
+  }
+
+  // 안개 한 덩어리를 미리 그려둔 스프라이트 — 매 프레임 그라디언트를 새로 만들지 않습니다
+  createFogSprite() {
+    const size = 256;
+    const sprite = document.createElement('canvas');
+    sprite.width = sprite.height = size;
+    const g = sprite.getContext('2d');
+    const half = size / 2;
+    const grad = g.createRadialGradient(half, half, 0, half, half, half);
+    grad.addColorStop(0, 'rgba(32, 40, 54, 1)');
+    grad.addColorStop(0.5, 'rgba(18, 22, 30, 0.53)');
+    grad.addColorStop(1, 'rgba(10, 12, 16, 0)');
+    g.fillStyle = grad;
+    g.fillRect(0, 0, size, size);
+    return sprite;
   }
 
   resizeCanvas() {
+    const prevW = this.canvas.width;
+    const prevH = this.canvas.height;
     this.canvas.width = window.innerWidth;
     this.canvas.height = window.innerHeight;
+
+    // 화면 크기가 크게 바뀌면 입자 분포/개수를 다시 맞춥니다
+    if (this.particles.length && (Math.abs(prevW - this.canvas.width) > 200 || Math.abs(prevH - this.canvas.height) > 200)) {
+      this.initParticles();
+    }
+  }
+
+  particleCount() {
+    // 화면 넓이에 비례하되 4K 등에서 과도하게 늘지 않도록 상한을 둡니다
+    const n = Math.floor((this.canvas.width * this.canvas.height) / 14000);
+    return Math.max(24, Math.min(n, 160));
   }
 
   initParticles() {
     this.particles = [];
-    const count = Math.floor((window.innerWidth * window.innerHeight) / 14000);
+    const count = this.particleCount();
     for (let i = 0; i < count; i++) {
-      this.particles.push(this.createParticle());
+      this.particles.push(this.createParticle(false));
     }
   }
 
-  createParticle(isNew = false) {
+  // fromEdge=true: 화면 좌/우 바깥에서 새로 흘러들어오는 입자
+  createParticle(fromEdge) {
     const width = this.canvas.width;
     const height = this.canvas.height;
+    const radius = 120 + Math.random() * 220;
+    const speed = this.reducedMotion ? 0.15 : 1;
+    let x = Math.random() * width;
+    let vx = (Math.random() - 0.5) * 0.45 * speed;
+
+    if (fromEdge) {
+      const fromLeft = Math.random() < 0.5;
+      x = fromLeft ? -radius : width + radius;
+      vx = (fromLeft ? 1 : -1) * (0.05 + Math.random() * 0.2) * speed; // 화면 안쪽을 향해
+    }
+
     return {
-      x: isNew ? (Math.random() < 0.5 ? -100 : width + 100) : Math.random() * width,
+      x,
       y: Math.random() * height,
-      radius: 120 + Math.random() * 220,
-      vx: (Math.random() - 0.5) * 0.45,
-      vy: (Math.random() - 0.5) * 0.25,
+      radius,
+      vx,
+      vy: (Math.random() - 0.5) * 0.25 * speed,
       baseAlpha: 0.12 + Math.random() * 0.2,
       alpha: 0.01,
       fadeSpeed: 0.003 + Math.random() * 0.005,
@@ -51,25 +97,29 @@ class IntroManager {
     };
   }
 
+  isOffscreen(p) {
+    const w = this.canvas.width;
+    const h = this.canvas.height;
+    return p.x < -p.radius * 1.2 || p.x > w + p.radius * 1.2 || p.y < -p.radius * 1.2 || p.y > h + p.radius * 1.2;
+  }
+
   startMistAnimation() {
+    const ctx = this.ctx;
+
     const render = () => {
-      if (!this.ctx) return;
-      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      const w = this.canvas.width;
+      const h = this.canvas.height;
+      ctx.clearRect(0, 0, w, h);
 
       for (let i = 0; i < this.particles.length; i++) {
-        const p = this.particles[i];
+        let p = this.particles[i];
 
-        // 안개 분산(Parting) 상태일 때 좌우로 급속 분산
         if (this.isParted) {
-          const midX = this.canvas.width / 2;
-          if (p.x < midX) {
-            p.vx -= 0.8;
-          } else {
-            p.vx += 0.8;
-          }
-          p.baseAlpha *= 0.95;
+          // 걷힐 때: 중앙에서 좌우로 급속 분산
+          p.vx += p.x < w / 2 ? -0.8 : 0.8;
+          p.alpha *= 0.95;
         } else {
-          // 일반 상태: 알파 페이드 인/아웃 호흡 효과
+          // 평상시: 알파 호흡 효과
           if (p.fadingIn) {
             p.alpha += p.fadeSpeed;
             if (p.alpha >= p.baseAlpha) p.fadingIn = false;
@@ -82,17 +132,15 @@ class IntroManager {
         p.x += p.vx;
         p.y += p.vy;
 
-        // 원형 그라디언트로 부드러운 먹구름/안개 표현
-        const grad = this.ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius);
-        grad.addColorStop(0, `rgba(32, 40, 54, ${p.alpha * 1.5})`);
-        grad.addColorStop(0.5, `rgba(18, 22, 30, ${p.alpha * 0.8})`);
-        grad.addColorStop(1, 'rgba(10, 12, 16, 0)');
+        // 화면 밖으로 흘러나간 안개는 반대편에서 새로 들어오게 합니다
+        if (!this.isParted && this.isOffscreen(p)) {
+          p = this.particles[i] = this.createParticle(true);
+        }
 
-        this.ctx.fillStyle = grad;
-        this.ctx.beginPath();
-        this.ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-        this.ctx.fill();
+        ctx.globalAlpha = Math.min(1, p.alpha * 1.5);
+        ctx.drawImage(this.sprite, p.x - p.radius, p.y - p.radius, p.radius * 2, p.radius * 2);
       }
+      ctx.globalAlpha = 1;
 
       this.animId = requestAnimationFrame(render);
     };
@@ -100,43 +148,40 @@ class IntroManager {
     render();
   }
 
+  stopMistAnimation() {
+    if (this.animId) {
+      cancelAnimationFrame(this.animId);
+      this.animId = null;
+    }
+  }
+
   bindEvents() {
     if (!this.introScreen) return;
 
-    // 클릭 시 구름/안개가 좌우로 걷힘
-    this.introScreen.addEventListener('click', () => {
-      if (this.isParted) return;
-      this.triggerParting();
+    this.introScreen.addEventListener('click', () => this.triggerParting(false));
+
+    this.introScreen.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        this.triggerParting(true);
+      }
     });
   }
 
-  triggerParting() {
+  // viaKeyboard: Enter/Space 로 입장했는지 — 키보드 사용자에게만 지도로 포커스를 옮깁니다
+  triggerParting(viaKeyboard) {
+    if (this.isParted) return;
     this.isParted = true;
     this.introScreen.classList.add('parted');
 
-    // 메인 지도 연계 콜백 호출
     if (typeof this.onIntroComplete === 'function') {
-      this.onIntroComplete();
+      this.onIntroComplete(viaKeyboard);
     }
 
-    // 애니메이션 완료 후 화면 가리기
+    // 걷힘 연출이 끝나면 인트로를 완전히 제거
     setTimeout(() => {
-      this.introScreen.style.display = 'none';
-      if (this.animId) {
-        cancelAnimationFrame(this.animId);
-      }
-    }, 2200);
-  }
-
-  // 사용자가 다시 인트로를 보고 싶을 때 (안개 다시 덮기)
-  resetIntro() {
-    if (!this.introScreen) return;
-    this.introScreen.style.display = 'flex';
-    // 강제 리플로우
-    void this.introScreen.offsetWidth;
-    this.isParted = false;
-    this.introScreen.classList.remove('parted');
-    this.initParticles();
-    this.startMistAnimation();
+      this.introScreen.hidden = true;
+      this.stopMistAnimation();
+    }, this.reducedMotion ? 50 : 2200);
   }
 }

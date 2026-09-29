@@ -5,25 +5,32 @@
 #main-screen {
   position: relative;
   width: 100vw;
-  height: 100vh;
+  height: var(--vh-full);
   overflow: hidden;
   background: #090c12;
-  transition: filter 1s ease;
 }
 
 /* 지도 뷰포트 */
 #map-viewport {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   overflow: hidden;
   cursor: grab;
+  touch-action: none;            /* 브라우저 기본 스크롤·핀치 대신 직접 처리 */
+  outline: none;
 }
 
-#map-viewport:active {
+#map-viewport.is-dragging {
   cursor: grabbing;
+}
+
+#map-viewport:focus-visible::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 2px solid var(--accent-light);
+  pointer-events: none;
+  z-index: 1;
 }
 
 #map-container {
@@ -33,20 +40,21 @@
   width: 1400px;
   height: 1400px;
   transform-origin: 0 0;
-  transition: transform 0.08s linear;
+  /* transform 은 JS 가 매 프레임 직접 지정 — CSS transition 을 두면 입력이 밀립니다 */
   box-shadow: 0 25px 70px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.08);
   border-radius: 2px;
 }
 
-/* SVG 판타지 지도 */
 #fantasy-map {
   width: 100%;
   height: 100%;
   display: block;
-  filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.8));
+  overflow: visible;
 }
 
-/* 상단 네비게이션 HUD */
+/* ==========================================================================
+   상단 HUD
+   ========================================================================== */
 .top-hud {
   position: absolute;
   top: 20px;
@@ -56,6 +64,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
   pointer-events: none;
 }
 
@@ -63,27 +72,17 @@
   pointer-events: auto;
 }
 
-.brand-section {
-  display: flex;
-  align-items: center;
-  background: transparent;
-  padding: 0;
-  border: none;
-  box-shadow: none;
-  backdrop-filter: none;
-}
-
 .brand-title {
   font-family: var(--font-serif);
   font-size: 22px;
-  font-weight: 400; /* Noto Serif KR 얇은 굵기 */
+  font-weight: 400;
   letter-spacing: 8px;
   padding-left: 8px;
   color: #f1f5f9;
-  text-shadow: 0 0 16px rgba(56, 189, 248, 0.35);
+  text-shadow: 0 0 16px rgba(56, 189, 248, 0.35), 0 1px 6px rgba(0, 0, 0, 0.9);
+  white-space: nowrap;
 }
 
-/* 우측 유틸리티 컨트롤 */
 .util-controls {
   display: flex;
   gap: 8px;
@@ -94,13 +93,15 @@
   border-color: #f59e0b;
 }
 
-#btn-daynight.night {
+#btn-daynight[aria-pressed="true"] {
   border-color: #818cf8;
   background: linear-gradient(180deg, rgba(30, 27, 75, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%);
   color: #c7d2fe;
 }
 
-/* 지도 조작 안내 힌트 */
+/* ==========================================================================
+   하단 조작 안내 힌트
+   ========================================================================== */
 .map-hint {
   position: absolute;
   bottom: 24px;
@@ -111,47 +112,57 @@
   gap: 12px;
   background: rgba(14, 18, 25, 0.75);
   backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border: 1px solid var(--border-subtle);
   padding: 8px 16px;
   border-radius: 20px;
   font-size: 12px;
   color: var(--text-dim);
   pointer-events: none;
+  transition: opacity 0.3s ease;
 }
 
 .hint-badge {
-  color: var(--gold-primary);
+  color: var(--accent);
   font-weight: 600;
+  white-space: nowrap;
+}
+
+.hint-touch { display: none; }
+
+@media (hover: none) and (pointer: coarse) {
+  .hint-mouse { display: none; }
+  .hint-touch { display: inline; }
 }
 
 /* ==========================================================================
-   동양풍 족자(Scroll) 정보 안내 패널
+   동양풍 족자(Scroll) 정보 패널
    ========================================================================== */
-
 #info-panel {
   position: absolute;
   right: 28px;
   bottom: 28px;
-  width: 440px;
-  max-height: calc(100vh - 120px);
+  width: min(440px, calc(100vw - 56px));
+  max-height: calc(var(--vh-full) - 120px);
   z-index: 200;
   display: flex;
   flex-direction: column;
   transform: translateY(30px) scale(0.96);
   opacity: 0;
   visibility: hidden;
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.4s;
   filter: drop-shadow(0 15px 35px rgba(0, 0, 0, 0.85));
 }
 
 #info-panel.active {
-  transform: translateY(0) scale(1);
+  transform: none;
   opacity: 1;
   visibility: visible;
 }
 
-/* 족자 상/하단 축목 (Wooden Rod) */
+/* 족자 상/하단 축목 */
 .scroll-rod {
+  flex-shrink: 0;
   height: 14px;
   background: linear-gradient(90deg, #0d1522 0%, #1e3a5f 50%, #0d1522 100%);
   border-radius: 4px;
@@ -166,51 +177,34 @@
   top: -3px;
   width: 14px;
   height: 20px;
-  background: #38bdf8;
+  background: var(--accent);
   border-radius: 2px;
   box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.6);
 }
 .scroll-rod::before { left: -6px; }
 .scroll-rod::after { right: -6px; }
 
-/* 족자 비단 테두리 & 한지 본문 */
+/* 족자 본문 (스크롤 영역) */
 .scroll-body {
-  background: 
-    linear-gradient(180deg, rgba(14, 20, 30, 0.98) 0%, rgba(9, 13, 20, 0.98) 100%);
+  min-height: 0;
+  background: linear-gradient(180deg, rgba(14, 20, 30, 0.98) 0%, rgba(9, 13, 20, 0.98) 100%);
   border-left: 10px solid #101726;
   border-right: 10px solid #101726;
   padding: 24px 28px;
   overflow-y: auto;
-  position: relative;
+  overscroll-behavior: contain;
   color: #e2e8f0;
   border-top: 1px solid rgba(56, 189, 248, 0.4);
   border-bottom: 1px solid rgba(56, 189, 248, 0.4);
 }
 
-/* 족자 닫기 버튼 */
-.btn-close-scroll {
+/* 닫기 버튼은 스크롤 영역 밖에 두어 내용을 내려도 항상 보입니다 */
+#btn-close-scroll {
   position: absolute;
-  top: 16px;
-  right: 18px;
-  background: transparent;
-  border: 1px solid rgba(56, 189, 248, 0.35);
-  color: #38bdf8;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  transition: all 0.2s ease;
-}
-
-.btn-close-scroll:hover {
-  background: rgba(56, 189, 248, 0.2);
-  transform: rotate(90deg);
-  border-color: #38bdf8;
-  color: #bae6fd;
+  top: 30px;
+  right: 28px;
+  z-index: 2;
+  background: rgba(9, 13, 20, 0.9);
 }
 
 /* 패널 헤더 */
@@ -222,42 +216,82 @@
 .panel-direction-badge {
   display: inline-block;
   font-size: 11px;
-  color: var(--gold-primary);
+  color: var(--accent);
   letter-spacing: 2px;
-  border: 1px solid var(--gold-dark);
+  border: 1px solid var(--accent-dark);
   padding: 2px 8px;
   margin-bottom: 8px;
   border-radius: 2px;
-  background: rgba(212, 175, 55, 0.08);
+  background: var(--accent-tint);
 }
 
 .panel-title-wrap {
   display: flex;
   align-items: baseline;
+  flex-wrap: wrap;
   gap: 10px;
   margin-bottom: 4px;
 }
 
 .panel-name {
   font-size: 28px;
-  font-weight: 800;
+  font-weight: 900;
   letter-spacing: 3px;
-  color: #fff4e0;
+  color: #f1f5f9;
+  line-height: 1.3;
 }
 
 .panel-hanja {
   font-size: 18px;
-  color: var(--gold-primary);
+  color: var(--accent);
   opacity: 0.85;
 }
 
-.panel-category {
-  font-size: 13px;
-  color: #cbd5e1;
-  letter-spacing: 1px;
+/* 선택된 거점 안내 박스 */
+.panel-landmark {
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  background: rgba(56, 189, 248, 0.1);
+  border: 1px solid var(--accent-border);
+  border-radius: 4px;
 }
 
-/* 세력 및 위험도 메타정보 테이블 */
+.panel-landmark-kicker {
+  font-size: 11px;
+  color: var(--accent-light);
+}
+
+.panel-landmark-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.panel-landmark-name span {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--accent);
+}
+
+.panel-landmark-desc {
+  font-size: 12px;
+  color: var(--text-body);
+  margin-top: 4px;
+}
+
+/* 요약 인용 */
+.panel-summary-quote {
+  font-size: 13px;
+  font-style: italic;
+  color: var(--accent-light);
+  background: var(--accent-tint);
+  border-left: 3px solid var(--accent);
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  line-height: 1.6;
+}
+
+/* 세력 및 위험도 메타정보 */
 .panel-meta-table {
   width: 100%;
   border-collapse: collapse;
@@ -267,38 +301,33 @@
   border-bottom: 1px dashed rgba(56, 189, 248, 0.25);
 }
 
+.panel-meta-table th,
 .panel-meta-table td {
   padding: 8px 6px;
   vertical-align: top;
+  text-align: left;
 }
 
-.panel-meta-table .meta-label {
-  color: var(--gold-primary);
+.panel-meta-table th {
+  color: var(--accent);
   width: 80px;
   font-weight: 600;
 }
 
-.panel-meta-table .meta-val {
+.panel-meta-table td {
   color: #e2e8f0;
 }
 
-/* 요약 배너 */
-.panel-summary-quote {
-  font-size: 13px;
-  font-style: italic;
-  color: var(--gold-light);
-  background: rgba(56, 189, 248, 0.08);
-  border-left: 3px solid var(--gold-primary);
-  padding: 10px 14px;
-  margin-bottom: 16px;
-  line-height: 1.6;
+.panel-meta-table .danger {
+  color: #f87171;
+  font-weight: 700;
 }
 
 /* 상세 본문 */
 .panel-desc {
   font-size: 13px;
   line-height: 1.8;
-  color: #d8cfc4;
+  color: #d4dbe6;
   margin-bottom: 20px;
   white-space: pre-line;
 }
@@ -307,7 +336,7 @@
 .panel-traits-title {
   font-size: 12px;
   font-weight: 700;
-  color: var(--gold-primary);
+  color: var(--accent);
   letter-spacing: 1px;
   margin-bottom: 8px;
 }
@@ -315,7 +344,7 @@
 .panel-traits-list {
   list-style: none;
   font-size: 12px;
-  color: #cbd5e1;
+  color: var(--text-body);
 }
 
 .panel-traits-list li {
@@ -329,51 +358,126 @@
   content: '◈';
   position: absolute;
   left: 0;
-  color: var(--gold-primary);
+  color: var(--accent);
   font-size: 10px;
 }
 
-/* 특수 경고 박스 (황해 밤바다 경고 등) */
-.panel-warning {
+/* 주/야간 안내 박스 (황해) */
+.panel-notice {
   margin-top: 16px;
   padding: 10px 14px;
-  background: rgba(239, 68, 68, 0.12);
-  border: 1px solid rgba(239, 68, 68, 0.4);
   border-radius: 4px;
   font-size: 12px;
-  color: #fca5a5;
   display: flex;
   align-items: center;
   gap: 8px;
+  background: var(--accent-tint);
+  border: 1px solid var(--accent-border);
+  color: var(--accent-pale);
+}
+
+.panel-notice.is-night {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: var(--danger-light);
 }
 
 /* ==========================================================================
-   지도 인터랙션 (호버 구역, 핀 마커, 툴팁)
+   지도 인터랙션 (구역, 핀 마커, 툴팁)
    ========================================================================== */
 
-/* 영역 폴리곤 (순수 투명 클릭/호버 감지용 - 마우스 오버 시 색상/테두리 일체 미표시) */
+/* 구역 폴리곤: 평소엔 투명, 호버 시 아주 옅은 색만 비칩니다.
+   호버 색을 완전히 없애려면 --region-hover-opacity 를 0 으로 바꾸세요. */
+:root {
+  --region-hover-opacity: 0.1;
+}
+
 .region-polygon {
   cursor: pointer;
-  fill: rgba(0, 0, 0, 0.001) !important;
-  fill-opacity: 0.001 !important;
-  stroke: transparent !important;
-  stroke-width: 0 !important;
+  fill: var(--region-color, #fff);
+  fill-opacity: 0;
+  stroke: var(--region-color, #fff);
+  stroke-opacity: 0;
+  stroke-width: 2.5;
+  stroke-dasharray: 8 6;
+  stroke-linejoin: round;
   pointer-events: all;
-  filter: none !important;
+  outline: none;
+  transition: fill-opacity 0.25s ease, stroke-opacity 0.25s ease;
 }
 
 .region-polygon:hover,
-.region-polygon.active {
-  fill: rgba(0, 0, 0, 0.001) !important;
-  fill-opacity: 0.001 !important;
-  stroke: transparent !important;
-  stroke-width: 0 !important;
-  filter: none !important;
+.region-polygon.is-selected {
+  fill-opacity: var(--region-hover-opacity);
 }
 
-/* 거점 핀 마커 (호버 시 흔들림 방지 구조) */
+/* 키보드로 선택 중일 때는 경계선까지 보여 줍니다 */
+.region-polygon:focus-visible {
+  fill-opacity: var(--region-hover-opacity);
+  stroke-opacity: 0.9;
+}
+
+/* 지도 위 글자: SVG 필터 대신 외곽선(paint-order)으로 가독성 확보 — 확대/이동 시 훨씬 가볍습니다 */
+.map-text {
+  font-family: var(--font-serif);
+  paint-order: stroke fill;
+  stroke: rgba(0, 0, 0, 0.6);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
+.map-decor {
+  pointer-events: none;
+}
+
+.region-label {
+  font-weight: 900;
+  letter-spacing: 4px;
+}
+
+.region-sublabel {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.route-label {
+  font-size: 11px;
+  font-weight: 700;
+  fill: #fef08a;
+}
+
+.monster-label {
+  font-size: 11px;
+  font-weight: 700;
+  fill: var(--danger-light);
+}
+
+.stamp-box {
+  fill: rgba(14, 18, 25, 0.75);
+  stroke: var(--accent-border);
+  stroke-width: 1;
+}
+
+.stamp-title {
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  fill: var(--accent);
+  stroke-width: 0;
+}
+
+.stamp-sub {
+  font-size: 10px;
+  letter-spacing: 1px;
+  fill: var(--text-dim);
+  stroke-width: 0;
+}
+
+/* 거점 핀 마커 */
 .map-marker {
   cursor: pointer;
+  outline: none;
 }
 
 .map-marker .marker-hitbox {
@@ -383,46 +487,55 @@
 
 .map-marker .marker-pin {
   transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.25s ease;
-  transform-origin: 0 0;
+  transform-origin: 0 0;          /* 부모 <g>가 translate 되어 있어 (0,0)이 핀의 중심입니다 */
 }
 
-.map-marker:hover .marker-pin {
+.map-marker:hover .marker-pin,
+.map-marker:focus-visible .marker-pin,
+.map-marker.is-selected .marker-pin {
   transform: scale(1.3);
   filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.95));
 }
 
 .marker-label {
-  font-family: var(--font-serif);
   font-size: 13px;
   font-weight: 700;
   fill: #fff;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.95));
   pointer-events: none;
   letter-spacing: 1px;
   transition: fill 0.2s ease;
 }
 
-.map-marker:hover .marker-label {
+.marker-label.is-small {
+  font-size: 11px;
+}
+
+.map-marker:hover .marker-label,
+.map-marker:focus-visible .marker-label,
+.map-marker.is-selected .marker-label {
   fill: #fde047;
 }
 
 /* 마우스 추종 미니 툴팁 */
 #map-tooltip {
   position: fixed;
+  top: 0;
+  left: 0;
   z-index: 300;
   pointer-events: none;
   background: rgba(10, 14, 20, 0.92);
   backdrop-filter: blur(8px);
-  border: 1px solid var(--gold-primary);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--accent);
   padding: 6px 12px;
   border-radius: 4px;
   font-size: 12px;
-  color: #fef08a;
+  color: var(--accent-pale);
   letter-spacing: 1px;
+  white-space: nowrap;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
   opacity: 0;
-  transition: opacity 0.15s ease, transform 0.1s ease;
-  transform: translate(12px, 12px);
+  transition: opacity 0.15s ease;
 }
 
 #map-tooltip.visible {
@@ -430,33 +543,45 @@
 }
 
 /* ==========================================================================
-   세계관 고증: 야간 모드 (Night Mode) 연출
+   야간 모드 (Night Mode)
    ========================================================================== */
 
 #main-screen.night-mode {
   background: #04060a;
 }
 
-#main-screen.night-mode #fantasy-map {
-  filter: brightness(0.72) contrast(1.18) hue-rotate(15deg);
+/* 필터는 배경 이미지 한 곳에만 — 마커·지명은 밤에도 선명하게 유지됩니다 */
+#map-bg-image {
+  transition: filter 0.8s ease;
 }
 
-/* 야간 시 황해 변화 */
-#main-screen.night-mode #sea-area {
-  fill: #1e112a !important;
-  stroke: #ef4444 !important;
-  stroke-width: 3;
+#main-screen.night-mode #map-bg-image {
+  filter: brightness(0.5) contrast(1.3) hue-rotate(200deg) saturate(1.2);
 }
 
-/* 야간 시 황해 괴수 실루엣 활성화 */
+/* 주간 뱃길: 밤에는 닫힘 */
+#day-shipping-route {
+  transition: opacity 0.8s ease;
+}
+
+#main-screen.night-mode #day-shipping-route {
+  opacity: 0;
+}
+
+/* 황해 괴수: 밤에만 등장, 클릭 시 '황해 중심 소용돌이' 열람 */
 #monster-group {
   opacity: 0;
-  transition: opacity 1.2s ease;
   pointer-events: none;
+  cursor: pointer;
+  transition: opacity 1.2s ease;
+  transform-box: fill-box;        /* 자기 중심 기준으로 흔들리도록 */
+  transform-origin: center;
+  outline: none;
 }
 
 #main-screen.night-mode #monster-group {
-  opacity: 0.88;
+  opacity: 0.9;
+  pointer-events: all;
   animation: monsterPulse 3.5s infinite alternate ease-in-out;
 }
 
@@ -465,12 +590,13 @@
   100% { transform: scale(1.03) rotate(1deg); filter: drop-shadow(0 0 25px rgba(239, 68, 68, 0.9)); }
 }
 
-/* 야간 경고 플로팅 배너 */
+/* 야간 경고 배너 */
 .night-warning-banner {
   position: absolute;
   top: 84px;
   left: 50%;
   transform: translateX(-50%);
+  max-width: calc(100vw - 32px);
   background: rgba(153, 27, 27, 0.9);
   border: 1px solid #f87171;
   color: #fee2e2;
@@ -479,16 +605,18 @@
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 2px;
+  text-align: center;
   z-index: 120;
   box-shadow: 0 0 25px rgba(239, 68, 68, 0.5);
   display: none;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
   animation: pulseWarning 2s infinite ease-in-out;
 }
 
 #main-screen.night-mode .night-warning-banner {
   display: flex;
-  align-items: center;
-  gap: 8px;
 }
 
 @keyframes pulseWarning {
@@ -496,11 +624,80 @@
   50% { opacity: 1; transform: translateX(-50%) scale(1.03); }
 }
 
-/* 야간 모드 시 고지도 이미지 블루문 감성 필터 전환 */
-#map-bg-image {
-  transition: filter 0.8s ease;
+/* ==========================================================================
+   반응형 — 태블릿 / 모바일
+   ========================================================================== */
+@media (max-width: 900px) {
+  .map-hint .hint-text { display: none; }
+  .map-hint { padding: 6px 12px; }
 }
 
-#main-screen.night-mode #map-bg-image {
-  filter: brightness(0.65) contrast(1.15) hue-rotate(185deg) saturate(1.1);
+@media (max-width: 640px) {
+  .top-hud {
+    top: max(12px, env(safe-area-inset-top));
+    left: 12px;
+    right: 12px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .brand-title {
+    font-size: 18px;
+    letter-spacing: 6px;
+    text-align: center;
+  }
+
+  .util-controls {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+  }
+
+  .btn-oriental {
+    justify-content: center;
+    padding: 8px 4px;
+    font-size: 12px;
+    letter-spacing: 0;
+  }
+
+  .night-warning-banner {
+    top: 104px;
+    font-size: 11px;
+    letter-spacing: 0;
+    padding: 6px 14px;
+    width: max-content;
+  }
+
+  .map-hint {
+    left: 12px;
+    bottom: max(12px, env(safe-area-inset-bottom));
+  }
+
+  /* 족자는 화면 하단 시트 형태로 */
+  #info-panel {
+    left: 12px;
+    right: 12px;
+    bottom: max(12px, env(safe-area-inset-bottom));
+    width: auto;
+    max-height: 62%;
+  }
+
+  #main-screen.panel-open .map-hint {
+    opacity: 0;
+  }
+
+  .scroll-body {
+    padding: 18px 16px;
+    border-left-width: 6px;
+    border-right-width: 6px;
+  }
+
+  #btn-close-scroll {
+    top: 24px;
+    right: 18px;
+  }
+
+  .panel-name { font-size: 22px; }
+  .panel-hanja { font-size: 15px; }
 }

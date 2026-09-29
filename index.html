@@ -2,9 +2,19 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="황량계(荒涼界) — 동양 판타지 세계관 인터랙티브 전도">
+  <meta name="theme-color" content="#070a10">
   <title>황량계 (荒涼界) | 동양 판타지 인터랙티브 전도</title>
-  <!-- 스타일시트 로드 -->
+
+  <!-- 웹폰트: CSS @import 대신 head에서 병렬 로드 (실제 사용하는 굵기만) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@300;400;600;700;900&display=swap">
+
+  <!-- 지도 이미지는 인트로 동안 미리 받아둡니다 -->
+  <link rel="preload" href="assets/images/map.webp" as="image" type="image/webp">
+
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/intro.css">
   <link rel="stylesheet" href="css/map.css">
@@ -12,30 +22,22 @@
 <body>
 
   <!-- ======================================================================
-       1. 인트로 화면: 구름과 안개로 뒤덮인 인트로 (클릭 시 좌우로 걷힘)
+       1. 인트로 화면: 구름과 안개로 뒤덮인 인트로 (클릭 / Enter 시 좌우로 걷힘)
        ====================================================================== -->
-  <div id="intro-screen" title="클릭하여 안개를 걷고 대륙으로 입장하십시오">
-    <!-- 실시간 안개 시뮬레이션 캔버스 -->
-    <canvas id="mist-canvas"></canvas>
+  <div id="intro-screen" role="button" tabindex="0" aria-label="안개를 걷고 황량계 대륙으로 입장하기">
+    <canvas id="mist-canvas" aria-hidden="true"></canvas>
 
-    <!-- 좌우로 갈라지는 구름 장막 -->
-    <div class="curtain-container">
-      <div class="cloud-curtain curtain-left">
-        <div class="cloud-texture"></div>
-      </div>
-      <div class="cloud-curtain curtain-right">
-        <div class="cloud-texture"></div>
-      </div>
+    <div class="curtain-container" aria-hidden="true">
+      <div class="cloud-curtain curtain-left"><div class="cloud-texture"></div></div>
+      <div class="cloud-curtain curtain-right"><div class="cloud-texture"></div></div>
     </div>
 
-    <!-- 중앙 타이틀 및 입장 안내 -->
     <div class="intro-content">
-      <h1 class="intro-title">荒涼界</h1>
+      <h1 class="intro-title" lang="zh-Hant">荒涼界</h1>
       <p class="intro-korean">황량계</p>
-
-      <div class="intro-cta" title="클릭하여 대륙으로 입장">
-        <span class="cta-icon" data-icon="ads_click">
-          <svg fill="currentColor" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24"><path d="M11.71 17.99A5.993 5.993 0 0 1 6 12c0-3.31 2.69-6 6-6 3.22 0 5.84 2.53 5.99 5.71l-2.1-.63a3.999 3.999 0 1 0-4.81 4.81l.63 2.1zM22 12c0 .3-.01.6-.04.9l-1.97-.59c.01-.1.01-.21.01-.31 0-4.42-3.58-8-8-8s-8 3.58-8 8 3.58 8 8 8c.1 0 .21 0 .31-.01l.59 1.97c-.3.03-.6.04-.9.04-5.52 0-10-4.48-10-10S6.48 2 12 2s10 4.48 10 10zm-3.77 4.26L22 15l-10-3 3 10 1.26-3.77 4.27 4.27 1.98-1.98-4.28-4.26z"/></svg>
+      <div class="intro-cta" aria-hidden="true">
+        <span class="cta-icon">
+          <svg fill="currentColor" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M11.71 17.99A5.993 5.993 0 0 1 6 12c0-3.31 2.69-6 6-6 3.22 0 5.84 2.53 5.99 5.71l-2.1-.63a3.999 3.999 0 1 0-4.81 4.81l.63 2.1zM22 12c0 .3-.01.6-.04.9l-1.97-.59c.01-.1.01-.21.01-.31 0-4.42-3.58-8-8-8s-8 3.58-8 8 3.58 8 8 8c.1 0 .21 0 .31-.01l.59 1.97c-.3.03-.6.04-.9.04-5.52 0-10-4.48-10-10S6.48 2 12 2s10 4.48 10 10zm-3.77 4.26L22 15l-10-3 3 10 1.26-3.77 4.27 4.27 1.98-1.98-4.28-4.26z"/></svg>
         </span>
       </div>
     </div>
@@ -43,352 +45,122 @@
 
   <!-- ======================================================================
        2. 메인 화면: 황량계 인터랙티브 판타지 지도
+       (인트로가 걷히기 전까지는 inert — 키보드 포커스가 뒤로 새지 않도록)
        ====================================================================== -->
-  <div id="main-screen">
+  <div id="main-screen" inert>
 
-    <!-- 상단 네비게이션 HUD -->
     <header class="top-hud">
-      <!-- 로고 / 세계관 타이틀 -->
       <div class="brand-section">
-        <h1 class="brand-title">황량계</h1>
+        <p class="brand-title">황량계</p>
       </div>
 
-      <!-- 우측 컨트롤 버튼들 -->
-      <div class="util-controls">
-        <button id="btn-lore-modal" class="btn-oriental" title="세계관 열기">
-          <span>세계관</span>
-        </button>
-        <button id="btn-characters-modal" class="btn-oriental" title="등장인물 열기">
-          <span>등장인물</span>
-        </button>
-        <button id="btn-daynight" class="btn-oriental" title="주/야간 모드 전환">
-          <span>☀️ 주간</span>
-        </button>
-        <button id="btn-reset-view" class="btn-oriental" title="전도 시점 복원">
-          <span>전도 복원</span>
-        </button>
-      </div>
+      <nav class="util-controls" aria-label="지도 도구">
+        <button type="button" id="btn-lore-modal" class="btn-oriental" aria-haspopup="dialog">세계관</button>
+        <button type="button" id="btn-characters-modal" class="btn-oriental" aria-haspopup="dialog">등장인물</button>
+        <button type="button" id="btn-daynight" class="btn-oriental" aria-pressed="false">☀️ 주간</button>
+        <button type="button" id="btn-reset-view" class="btn-oriental">전도 복원</button>
+      </nav>
     </header>
 
     <!-- 야간 모드 시 황해 괴수 경고 배너 -->
-    <div class="night-warning-banner">
-      <span>⚠️</span>
-      <span>[ 야간 경보 ] 황해 심해 괴수 출몰 중! 야간 해상 횡단 절대 불가</span>
-    </div>
+    <div class="night-warning-banner" role="status" aria-live="polite"></div>
 
-    <!-- 하단 조작 안내 힌트 -->
-    <div class="map-hint">
+    <!-- 하단 조작 안내 힌트 (입력 장치에 따라 문구가 바뀝니다) -->
+    <div class="map-hint" aria-hidden="true">
       <span class="hint-badge">◈ 지도 탐색</span>
-      <span>마우스 드래그: 지도 이동 | 휠 스크롤: 확대/축소 | 구역/마커 클릭: 상세 족자 열람</span>
+      <span class="hint-text hint-mouse">드래그: 이동 | 휠: 확대/축소 | 구역·거점 클릭: 족자 열람</span>
+      <span class="hint-text hint-touch">밀어서 이동 | 두 손가락: 확대/축소 | 탭: 족자 열람</span>
     </div>
 
-    <!-- 지도 뷰포트 & Pan/Zoom 컨테이너 -->
-    <main id="map-viewport">
+    <!-- 지도 뷰포트: 포커스 시 방향키로 이동, +/- 확대, 0 복원 -->
+    <main id="map-viewport" tabindex="0" aria-label="황량계 지도. 방향키로 이동, 더하기·빼기 키로 확대·축소, Tab으로 구역과 거점을 선택할 수 있습니다.">
       <div id="map-container">
-        
-        <!-- ==============================================================
-             황량계 동양 판타지 고지도 SVG
-             ============================================================== -->
-        <svg id="fantasy-map" viewBox="0 0 1400 1400" xmlns="http://www.w3.org/2000/svg">
+        <svg id="fantasy-map" viewBox="0 0 1400 1400" xmlns="http://www.w3.org/2000/svg" role="group" aria-label="황량계 전도">
           <defs>
-            <!-- 마커 발광 필터 -->
             <filter id="marker-glow" x="-50%" y="-50%" width="200%" height="200%">
               <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#f59e0b" flood-opacity="0.85" />
             </filter>
             <filter id="red-glow" x="-50%" y="-50%" width="200%" height="200%">
               <feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#ef4444" flood-opacity="0.9" />
             </filter>
-            <filter id="text-shadow" x="-20%" y="-20%" width="140%" height="140%">
-              <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000000" flood-opacity="0.95" />
-            </filter>
           </defs>
 
-          <!-- 1. 고화질 지도 배경 이미지 (WebP 385KB 초경량 고화질) -->
+          <!-- 1. 지도 배경 이미지 -->
           <image id="map-bg-image" href="assets/images/map.webp" x="0" y="0" width="1400" height="1400" preserveAspectRatio="none" />
 
-          <!-- 2. 인터랙티브 구역 폴리곤 (호버/클릭 감지) -->
-          <!-- 1) 중앙 황해 (荒海) 구역 -->
-          <polygon class="region-polygon" data-region="hwanghae" points="
-            640,510 740,500 810,550 860,610 930,670 950,740 900,800 840,780 780,740 700,730 630,730 620,680 645,615 680,565
-          " fill="#3b82f6" stroke="#60a5fa" stroke-width="2.5" style="--hover-glow: rgba(59, 130, 246, 0.9);" />
+          <!-- 2. 구역 폴리곤 — js/data.js 의 regions[].polygon 으로 생성 -->
+          <g id="regions-layer"></g>
 
-          <!-- 2) 북부 유령곡 (幽靈谷) 구역 -->
-          <polygon class="region-polygon" data-region="yuryeonggok" points="
-            450,80 600,60 750,70 880,100 940,190 900,270 860,340 770,440 660,430 580,470 480,430 410,350 390,240 410,140
-          " fill="#64748b" stroke="#cbd5e1" stroke-width="2.5" style="--hover-glow: rgba(203, 213, 225, 0.9);" />
-
-          <!-- 3) 서부 추라대 (追羅隊) 구역 -->
-          <polygon class="region-polygon" data-region="churadae" points="
-            400,430 480,430 580,470 640,510 620,680 540,680 480,740 380,840 240,850 170,780 190,640 160,560 210,460 300,450
-          " fill="#d97706" stroke="#f59e0b" stroke-width="2.5" style="--hover-glow: rgba(245, 158, 11, 0.9);" />
-
-          <!-- 4) 동부 명조궁 (冥朝宮) 구역 -->
-          <polygon class="region-polygon" data-region="myeongjogung" points="
-            860,340 980,340 1040,410 1180,480 1330,560 1380,640 1320,760 1240,880 1180,1020 1060,1040 960,960 950,740 860,610 810,550 740,500 770,440
-          " fill="#7c3aed" stroke="#a78bfa" stroke-width="2.5" style="--hover-glow: rgba(167, 139, 250, 0.9);" />
-
-          <!-- 5) 남부 흑사당 (黑蛇堂) 구역 -->
-          <polygon class="region-polygon" data-region="heuksadang" points="
-            540,680 620,680 700,730 780,740 840,780 900,800 950,740 960,960 920,1080 850,1240 760,1340 670,1220 630,1100 540,1040 460,1080 440,980 480,880 480,740
-          " fill="#059669" stroke="#34d399" stroke-width="2.5" style="--hover-glow: rgba(52, 211, 153, 0.9);" />
-
-          <!-- 3. 주간 안전 뱃길 (점선 항로) & 야간 괴수 -->
-          <g id="day-shipping-route">
+          <!-- 3. 주간 뱃길 (야간에는 사라짐) -->
+          <g id="day-shipping-route" class="map-decor">
             <path d="M 640,630 C 720,610 820,610 880,640" stroke="#f59e0b" stroke-width="2.5" stroke-dasharray="6,5" fill="none" opacity="0.9" />
-            <text x="760" y="605" font-family="'Noto Serif KR', serif" font-size="11" font-weight="700" fill="#fef08a" text-anchor="middle" filter="url(#text-shadow)">
-              ⚓ 주간 유일 뱃길
-            </text>
+            <text x="760" y="605" class="map-text route-label" text-anchor="middle">⚓ 주간 유일 뱃길</text>
           </g>
 
-          <g id="monster-group">
+          <!-- 4. 야간 황해 괴수 (야간에만 표시, 클릭 시 '황해 중심 소용돌이' 거점 열람) -->
+          <g id="monster-group" aria-hidden="true">
             <ellipse cx="760" cy="670" rx="42" ry="24" fill="#450a0a" stroke="#ef4444" stroke-width="2" />
             <circle cx="746" cy="666" r="3" fill="#fef08a" filter="url(#red-glow)" />
             <circle cx="774" cy="666" r="3" fill="#fef08a" filter="url(#red-glow)" />
-            <text x="760" y="710" font-family="'Noto Serif KR', serif" font-size="11" font-weight="700" fill="#fca5a5" text-anchor="middle" filter="url(#text-shadow)">
-              ⚠️ 황해 심해 괴수
-            </text>
+            <text x="760" y="710" class="map-text monster-label" text-anchor="middle">⚠️ 황해 심해 괴수</text>
           </g>
 
-          <!-- 4. 지명 및 세력명 캘리그래피 텍스트 -->
-          <g pointer-events="none">
-            <!-- 북부 유령곡 -->
-            <text x="670" y="270" font-family="'Noto Serif KR', serif" font-size="24" font-weight="900" fill="#f8fafc" text-anchor="middle" letter-spacing="4" filter="url(#text-shadow)">
-              유 령 곡
-            </text>
-            <text x="670" y="295" font-family="'Noto Serif KR', serif" font-size="12" font-weight="700" fill="#cbd5e1" text-anchor="middle" letter-spacing="2" filter="url(#text-shadow)">
-              [ 北部 · 幽靈谷 ] 세상의 끝자락
-            </text>
+          <!-- 5. 지명 라벨 — regions[].label 로 생성 -->
+          <g id="labels-layer" class="map-decor" aria-hidden="true"></g>
 
-            <!-- 서부 추라대 -->
-            <text x="380" y="610" font-family="'Noto Serif KR', serif" font-size="24" font-weight="900" fill="#fef3c7" text-anchor="middle" letter-spacing="4" filter="url(#text-shadow)">
-              추 라 대
-            </text>
-            <text x="380" y="635" font-family="'Noto Serif KR', serif" font-size="12" font-weight="700" fill="#f59e0b" text-anchor="middle" letter-spacing="2" filter="url(#text-shadow)">
-              [ 西部 · 追羅隊 ] 사냥꾼 연합
-            </text>
+          <!-- 6. 거점 마커 — landmarks[] 로 생성 -->
+          <g id="markers-layer"></g>
 
-            <!-- 동부 명조궁 -->
-            <text x="1090" y="610" font-family="'Noto Serif KR', serif" font-size="24" font-weight="900" fill="#ede9fe" text-anchor="middle" letter-spacing="4" filter="url(#text-shadow)">
-              명 조 궁
-            </text>
-            <text x="1090" y="635" font-family="'Noto Serif KR', serif" font-size="12" font-weight="700" fill="#c084fc" text-anchor="middle" letter-spacing="2" filter="url(#text-shadow)">
-              [ 東部 · 冥朝宮 ] 절대 패권
-            </text>
-
-            <!-- 남부 흑사당 -->
-            <text x="730" y="990" font-family="'Noto Serif KR', serif" font-size="24" font-weight="900" fill="#d1fae5" text-anchor="middle" letter-spacing="4" filter="url(#text-shadow)">
-              흑 사 당
-            </text>
-            <text x="730" y="1015" font-family="'Noto Serif KR', serif" font-size="12" font-weight="700" fill="#34d399" text-anchor="middle" letter-spacing="2" filter="url(#text-shadow)">
-              [ 南部 · 黑蛇堂 ] 암투와 독무림
-            </text>
-
-            <!-- 중앙 황해 -->
-            <text x="760" y="635" font-family="'Noto Serif KR', serif" font-size="22" font-weight="900" fill="#bfdbfe" text-anchor="middle" letter-spacing="4" filter="url(#text-shadow)">
-              황 해
-            </text>
-            <text x="760" y="658" font-family="'Noto Serif KR', serif" font-size="12" font-weight="700" fill="#60a5fa" text-anchor="middle" letter-spacing="2" filter="url(#text-shadow)">
-              [ 中心 · 荒海 ] 무법의 바다
-            </text>
-          </g>
-
-          <!-- 5. 거점 핀 마커 (Landmark Markers) -->
-          <!-- 북부: 통곡의 만년설봉 -->
-          <g class="map-marker" data-landmark="lm_ghost_peak" transform="translate(670, 220)">
-            <circle class="marker-hitbox" cx="0" cy="0" r="28" fill="transparent" />
-            <g class="marker-pin">
-              <circle cx="0" cy="0" r="13" fill="#334155" stroke="#e2e8f0" stroke-width="2" filter="url(#marker-glow)" />
-              <polygon points="0,-7 -6,4 6,4" fill="#e2e8f0" />
-            </g>
-            <text x="0" y="24" class="marker-label" text-anchor="middle">통곡설봉</text>
-          </g>
-
-          <!-- 북부: 빙봉수성 (Waterseal Castle) -->
-          <g class="map-marker" data-landmark="lm_waterseal_keep" transform="translate(508, 420)">
-            <circle class="marker-hitbox" cx="0" cy="0" r="28" fill="transparent" />
-            <g class="marker-pin">
-              <circle cx="0" cy="0" r="12" fill="#1e293b" stroke="#38bdf8" stroke-width="2" filter="url(#marker-glow)" />
-              <rect x="-5" y="-5" width="10" height="10" fill="#38bdf8" />
-            </g>
-            <text x="0" y="23" class="marker-label" text-anchor="middle">빙봉수성</text>
-          </g>
-
-          <!-- 서부: 추라성채 (Green Castle) -->
-          <g class="map-marker" data-landmark="lm_bounty_keep" transform="translate(429, 545)">
-            <circle class="marker-hitbox" cx="0" cy="0" r="28" fill="transparent" />
-            <g class="marker-pin">
-              <circle cx="0" cy="0" r="13" fill="#78350f" stroke="#fbbf24" stroke-width="2" filter="url(#marker-glow)" />
-              <rect x="-5" y="-5" width="10" height="10" fill="#fbbf24" />
-            </g>
-            <text x="0" y="24" class="marker-label" text-anchor="middle">추라성채</text>
-          </g>
-
-          <!-- 동부: 명조태궁 (도성) -->
-          <g class="map-marker" data-landmark="lm_palace" transform="translate(1084, 681)">
-            <circle class="marker-hitbox" cx="0" cy="0" r="30" fill="transparent" />
-            <g class="marker-pin">
-              <circle cx="0" cy="0" r="14" fill="#4c1d95" stroke="#c084fc" stroke-width="2" filter="url(#marker-glow)" />
-              <polygon points="0,-7 7,0 0,7 -7,0" fill="#fbcfe8" />
-            </g>
-            <text x="0" y="25" class="marker-label" text-anchor="middle">명조태궁</text>
-          </g>
-
-          <!-- 남부: 흑사연혈 -->
-          <g class="map-marker" data-landmark="lm_serpent_den" transform="translate(723, 908)">
-            <circle class="marker-hitbox" cx="0" cy="0" r="28" fill="transparent" />
-            <g class="marker-pin">
-              <circle cx="0" cy="0" r="13" fill="#064e3b" stroke="#34d399" stroke-width="2" filter="url(#marker-glow)" />
-              <path d="M -4,-4 Q 4,-1 -4,2 Q 4,5 0,6" stroke="#6ee7b7" stroke-width="2" fill="none" />
-            </g>
-            <text x="0" y="24" class="marker-label" text-anchor="middle">흑사연혈</text>
-          </g>
-
-          <!-- 소촌락 1: 낙원촌 -->
-          <g class="map-marker" data-landmark="lm_village_east" transform="translate(1200, 580)">
-            <circle class="marker-hitbox" cx="0" cy="0" r="24" fill="transparent" />
-            <g class="marker-pin">
-              <circle cx="0" cy="0" r="9" fill="#065f46" stroke="#10b981" stroke-width="1.8" />
-              <circle cx="0" cy="0" r="3.5" fill="#a7f3d0" />
-            </g>
-            <text x="0" y="20" class="marker-label" font-size="11" text-anchor="middle">낙원촌</text>
-          </g>
-
-          <!-- 소촌락 2: 풍사숙 -->
-          <g class="map-marker" data-landmark="lm_village_west" transform="translate(300, 660)">
-            <circle class="marker-hitbox" cx="0" cy="0" r="24" fill="transparent" />
-            <g class="marker-pin">
-              <circle cx="0" cy="0" r="9" fill="#065f46" stroke="#10b981" stroke-width="1.8" />
-              <circle cx="0" cy="0" r="3.5" fill="#a7f3d0" />
-            </g>
-            <text x="0" y="20" class="marker-label" font-size="11" text-anchor="middle">풍사숙</text>
-          </g>
-
-          <!-- 좌측 하단 고지도 낙관 도장 -->
-          <g id="map-legend-stamp" transform="translate(60, 1280)" pointer-events="none">
-            <rect x="0" y="0" width="130" height="60" fill="rgba(14,18,25,0.75)" stroke="var(--border-gold)" stroke-width="1" rx="3" />
-            <text x="16" y="25" font-family="'Noto Serif KR', serif" font-size="13" font-weight="900" fill="var(--gold-primary)" letter-spacing="2">荒涼界 輿地圖</text>
-            <text x="16" y="44" font-family="'Noto Serif KR', serif" font-size="10" fill="var(--text-dim)" letter-spacing="1">無法之界 · 力量至上</text>
+          <!-- 7. 좌측 하단 고지도 낙관 도장 -->
+          <g id="map-legend-stamp" class="map-decor" transform="translate(60, 1280)" aria-hidden="true">
+            <rect class="stamp-box" x="0" y="0" width="130" height="60" rx="3" />
+            <text class="map-text stamp-title" x="16" y="25">荒涼界 輿地圖</text>
+            <text class="map-text stamp-sub" x="16" y="44">無法之界 · 力量至上</text>
           </g>
         </svg>
-
       </div>
     </main>
 
     <!-- ==================================================================
-         3. 동양풍 족자(Scroll) 상세 정보 안내 패널
+         3. 동양풍 족자(Scroll) 상세 정보 패널
          ================================================================== -->
-    <aside id="info-panel">
-      <!-- 상단 축목 (Wooden Roller) -->
-      <div class="scroll-rod"></div>
-
-      <!-- 족자 한지 본문 -->
+    <aside id="info-panel" aria-labelledby="panel-title" inert>
+      <div class="scroll-rod" aria-hidden="true"></div>
+      <button type="button" id="btn-close-scroll" class="btn-close" aria-label="족자 닫기">✕</button>
       <div class="scroll-body">
-        <button id="btn-close-scroll" class="btn-close-scroll" title="족자 닫기">✕</button>
-        <div id="panel-content">
-          <!-- 동적으로 선택된 지역/세력의 상세 정보가 렌더링됩니다 -->
-        </div>
+        <div id="panel-content" aria-live="polite"></div>
       </div>
-
-      <!-- 하단 축목 (Wooden Roller) -->
-      <div class="scroll-rod"></div>
+      <div class="scroll-rod" aria-hidden="true"></div>
     </aside>
 
     <!-- 마우스 호버 미니 툴팁 -->
-    <div id="map-tooltip"></div>
-
-    <!-- ==================================================================
-         4. 전체 세계관 서책 모달 (다이얼로그)
-         ================================================================== -->
-    <div id="lore-modal">
-      <div class="modal-scroll-card">
-        <div class="modal-header">
-          <h3><span class="seal-stamp">記</span> 황량계(荒涼界) 세계관 비록(秘錄)</h3>
-          <button id="btn-close-lore" class="btn-close-scroll">✕</button>
-        </div>
-        <div class="modal-body">
-          <p><strong>황량계(荒涼界)</strong>는 국가도, 법도, 왕도도 없으며 오직 힘과 권력만이 유일한 법인 날것 그대로의 무법 대륙입니다.</p>
-
-          <h4>◈ 중심부: 황해 (荒海)</h4>
-          <ul>
-            <li>황량계 대륙의 정중앙에 위치한 거대한 바다로, 4대 구역의 경계입니다.</li>
-            <li><strong>밤에는 바다 괴수가 출몰</strong>하므로, 배로 건너려면 반드시 낮에만 이동해야 합니다.</li>
-          </ul>
-
-          <h4>◈ 북부: 유령곡 (幽靈谷)</h4>
-          <ul>
-            <li>황량계의 북쪽 경계면, 세상의 끝자락에 위치한 버려진 땅입니다.</li>
-            <li>귀신이 곡하는 소리 같은 거센 산바람이 부는 험준한 산악 고지대이며, 사나운 야수가 서식합니다.</li>
-          </ul>
-
-          <h4>◈ 서부: 추라대 (追羅隊)</h4>
-          <ul>
-            <li>서부 황야를 장악한 거대한 현상금 사냥꾼 연합 세력입니다.</li>
-            <li>돈과 유명세를 위해서라면 수단과 방법을 가리지 않습니다.</li>
-          </ul>
-
-          <h4>◈ 동부: 명조궁 (冥朝宮)</h4>
-          <ul>
-            <li>황량계의 혼란을 뒤에서 조장하고 막대한 돈과 권력을 흡수하는 거대 패권 집단입니다.</li>
-            <li>대부호와 권력자들이 배후이며, 마을과 군락에 보호 명목으로 세금을 걷습니다. 남부 흑사당과 대립합니다.</li>
-          </ul>
-
-          <h4>◈ 남부: 흑사당 (黑蛇堂)</h4>
-          <ul>
-            <li>남부 독무림 깊은 곳에 은신한 잔혹무도한 살수(살인 청부) 집단입니다.</li>
-            <li>명조궁의 확장을 경계하며 피비린내 나는 대립을 이어가고 있습니다.</li>
-          </ul>
-
-          <h4>◈ 군락과 마을</h4>
-          <ul>
-            <li>대륙 군데군데 작은 마을들이 분포해 있으며, 주로 동부 명조궁의 영향력을 크게 받습니다.</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-
-    <!-- ==================================================================
-         5. 주요 등장인물 모달 (다이얼로그)
-         ================================================================== -->
-    <div id="characters-modal">
-      <div class="modal-scroll-card">
-        <div class="modal-header">
-          <h3><span class="seal-stamp">人</span> 황량계(荒涼界) 주요 인물</h3>
-          <button id="btn-close-characters" class="btn-close-scroll">✕</button>
-        </div>
-        <div class="modal-body">
-          <p><strong>황량계(荒涼界)</strong>의 패권과 무법의 질서를 이끄는 각 세력의 주요 인물들입니다.</p>
-
-          <h4>◈ 서부 추라대: 사냥꾼 연합 총수</h4>
-          <ul>
-            <li><strong>지위:</strong> 서부 현상금 사냥꾼 연합 총수</li>
-            <li><strong>특징:</strong> 무거운 대도를 휘두르며 철저한 은자와 신의(信義)로 수천 명의 무법 사냥꾼들을 통솔합니다. 돈을 위해 살지만 '한 번 맺은 계약은 목숨 걸고 완수한다'는 철칙을 고수합니다.</li>
-          </ul>
-
-          <h4>◈ 동부 명조궁: 명조궁주</h4>
-          <ul>
-            <li><strong>지위:</strong> 동부 거대 패권 세력 명조궁의 절대 권력자</li>
-            <li><strong>특징:</strong> 황량계 각지의 무역로와 상단을 장악하고 막대한 부를 바탕으로 대륙의 질서를 배후에서 재편하려는 냉철한 지략가입니다.</li>
-          </ul>
-
-          <h4>◈ 남부 흑사당: 흑사당주</h4>
-          <ul>
-            <li><strong>지위:</strong> 남부 독무림 살수(살인 청부) 집단 두령</li>
-            <li><strong>특징:</strong> 독과 암기, 은신술의 정점에 선 자로, 표적으로 찍힌 자는 결코 살아남지 못한다는 악명이 자자합니다. 명조궁의 확장을 막기 위해 피비린내 나는 암투를 지휘합니다.</li>
-          </ul>
-
-          <h4>◈ 북부 유령곡: 은거 야수사</h4>
-          <ul>
-            <li><strong>지위:</strong> 북부 극한 고지대의 수수께끼 기인</li>
-            <li><strong>특징:</strong> 원혼의 곡소리가 끊이지 않는 험준한 유령곡의 칼바람 속에서 거대한 맹수와 영수들을 부리며 홀로 살아가는 신비로운 인물입니다.</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-
+    <div id="map-tooltip" aria-hidden="true"></div>
   </div>
 
-  <!-- 스크립트 로드 -->
-  <script src="js/icons.js"></script>
+  <!-- ==================================================================
+       4. 세계관 / 등장인물 모달 — 본문은 js/data.js 에서 생성
+       ================================================================== -->
+  <div id="lore-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="lore-modal-title" hidden>
+    <div class="modal-scroll-card">
+      <div class="modal-header">
+        <h2 id="lore-modal-title"><span class="seal-stamp" aria-hidden="true">記</span> 황량계(荒涼界) 세계관 비록(秘錄)</h2>
+        <button type="button" class="btn-close" data-close-modal aria-label="세계관 닫기">✕</button>
+      </div>
+      <div class="modal-body" id="lore-modal-body"></div>
+    </div>
+  </div>
+
+  <div id="characters-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="characters-modal-title" hidden>
+    <div class="modal-scroll-card">
+      <div class="modal-header">
+        <h2 id="characters-modal-title"><span class="seal-stamp" aria-hidden="true">人</span> 황량계(荒涼界) 주요 인물</h2>
+        <button type="button" class="btn-close" data-close-modal aria-label="등장인물 닫기">✕</button>
+      </div>
+      <div class="modal-body" id="characters-modal-body"></div>
+    </div>
+  </div>
+
+  <!-- 스크립트 (file:// 로 더블클릭해도 동작하도록 일반 스크립트로 로드) -->
   <script src="js/data.js"></script>
   <script src="js/intro.js"></script>
   <script src="js/map.js"></script>

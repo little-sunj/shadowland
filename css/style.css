@@ -2,39 +2,48 @@
    황량계(荒涼界) 공통 스타일 및 테마 정의
    ========================================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Noto+Serif+KR:wght@300;400;600;700;900&display=swap');
-
 :root {
-  /* 동양 판타지 테마 색상 팔레트 - 황량계 푸른빛 테마 */
+  /* 배경 */
   --bg-deep: #070a10;
-  --bg-ink: #0c121c;
-  --bg-parchment: #121a28;
+  --bg-panel: #0e141e;
+
+  /* 텍스트 */
   --text-main: #e8ecf4;
+  --text-body: #cbd5e1;
   --text-dim: #9ba8ba;
-  --text-muted: #64748b;
-  --gold-primary: #38bdf8;
-  --gold-light: #7dd3fc;
-  --gold-dark: #0284c7;
-  --crimson-seal: #0f233d;
-  --crimson-bright: #38bdf8;
-  --jade-green: #10b981;
-  --ghost-cyan: #38bdf8;
-  --border-gold: rgba(56, 189, 248, 0.35);
+
+  /* 강조색 — 황량계 푸른빛 테마 */
+  --accent: #38bdf8;
+  --accent-light: #7dd3fc;
+  --accent-pale: #bae6fd;
+  --accent-dark: #0284c7;
+  --accent-tint: rgba(56, 189, 248, 0.08);
+  --accent-border: rgba(56, 189, 248, 0.35);
+  --accent-glow: rgba(56, 189, 248, 0.45);
+  --seal-bg: #0f233d;
+
+  /* 경고 */
+  --danger: #ef4444;
+  --danger-light: #fca5a5;
+
   --border-subtle: rgba(255, 255, 255, 0.08);
 
-  /* 폰트: Noto Serif KR & Noto Sans KR 통일 */
+  /* 폰트 */
   --font-serif: 'Noto Serif KR', serif;
   --font-sans: 'Noto Sans KR', sans-serif;
-  --font-title: 'Noto Serif KR', serif;
-  --font-deco: 'Noto Serif KR', serif;
+
+  /* 모바일 주소창을 고려한 화면 높이 (미지원 브라우저는 100vh) */
+  --vh-full: 100vh;
+}
+
+@supports (height: 100dvh) {
+  :root { --vh-full: 100dvh; }
 }
 
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  -webkit-user-select: none;
-  user-select: none;
 }
 
 html, body {
@@ -47,33 +56,45 @@ html, body {
   line-height: 1.6;
 }
 
+/* 드래그·연타가 잦은 조작 영역만 텍스트 선택을 막습니다 (세계관/족자 글은 복사 가능) */
+#intro-screen,
+#map-viewport,
+.top-hud,
+.map-hint,
+button {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+/* 키보드 포커스 표시 (마우스 클릭 시에는 표시 안 함) */
+:focus-visible {
+  outline: 2px solid var(--accent-light);
+  outline-offset: 2px;
+}
+
 /* 스크롤바 커스텀 */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-track {
-  background: rgba(10, 14, 20, 0.8);
-}
-::-webkit-scrollbar-thumb {
-  background: #1e293b;
-  border-radius: 3px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #38bdf8;
-}
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: rgba(10, 14, 20, 0.8); }
+::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent); }
 
 /* 낙관(푸른색 전각 도장) 공통 스타일 */
 .seal-stamp {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
   width: 28px;
   height: 28px;
-  background: #0f233d;
-  color: #7dd3fc;
+  background: var(--seal-bg);
+  color: var(--accent-light);
   border: 1.5px solid rgba(56, 189, 248, 0.6);
   border-radius: 4px;
-  font-family: var(--font-title);
+  font-family: var(--font-serif);
   font-weight: 700;
   font-size: 13px;
   box-shadow: 0 0 10px rgba(56, 189, 248, 0.35);
@@ -81,18 +102,20 @@ html, body {
   vertical-align: middle;
 }
 
-/* 동양풍 버튼 스타일 (푸른빛 테마) */
+/* 동양풍 버튼 스타일 */
 .btn-oriental {
   background: linear-gradient(180deg, rgba(16, 26, 42, 0.85) 0%, rgba(10, 16, 28, 0.95) 100%);
   color: #e2e8f0;
-  border: 1px solid rgba(56, 189, 248, 0.35);
+  border: 1px solid var(--accent-border);
   padding: 8px 18px;
   font-family: var(--font-sans);
   font-size: 13px;
   font-weight: 500;
   letter-spacing: 2px;
+  white-space: nowrap;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: border-color 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    color 0.3s ease, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -110,57 +133,70 @@ html, body {
   width: 100%;
   height: 100%;
   background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.2), transparent);
-  transition: 0.5s;
+  transition: left 0.5s;
 }
 
-.btn-oriental:hover::before {
-  left: 100%;
-}
+.btn-oriental:hover::before { left: 100%; }
 
-.btn-oriental:hover {
-  border-color: #38bdf8;
-  box-shadow: 0 0 18px rgba(56, 189, 248, 0.45);
-  color: #bae6fd;
+.btn-oriental:hover,
+.btn-oriental:focus-visible {
+  border-color: var(--accent);
+  box-shadow: 0 0 18px var(--accent-glow);
+  color: var(--accent-pale);
   transform: translateY(-1px);
 }
 
-.btn-oriental.active {
-  background: linear-gradient(180deg, rgba(14, 45, 75, 0.9) 0%, rgba(10, 25, 45, 0.95) 100%);
-  border-color: #38bdf8;
-  color: #bae6fd;
-  box-shadow: 0 0 16px rgba(56, 189, 248, 0.4);
+/* 원형 닫기(✕) 버튼 — 족자·모달 공용. 위치는 각 컨테이너에서 지정합니다. */
+.btn-close {
+  flex-shrink: 0;
+  background: transparent;
+  border: 1px solid var(--accent-border);
+  color: var(--accent);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  line-height: 1;
+  transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.btn-close:hover,
+.btn-close:focus-visible {
+  background: rgba(56, 189, 248, 0.2);
+  transform: rotate(90deg);
+  border-color: var(--accent);
+  color: var(--accent-pale);
 }
 
 /* ==========================================================================
    세계관 및 등장인물 모달 (Modal)
    ========================================================================== */
-#lore-modal,
-#characters-modal {
+.modal {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
+  inset: 0;
   z-index: 500;
   background: rgba(4, 6, 10, 0.85);
   backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 16px;
   opacity: 0;
-  visibility: hidden;
-  transition: all 0.3s ease;
+  transition: opacity 0.3s ease;
 }
 
-#lore-modal.visible,
-#characters-modal.visible {
+.modal.visible {
   opacity: 1;
-  visibility: visible;
 }
 
 .modal-scroll-card {
-  width: min(720px, 92vw);
-  max-height: 85vh;
+  width: min(720px, 100%);
+  max-height: min(85vh, calc(var(--vh-full) - 32px));
   background: linear-gradient(180deg, #141a24 0%, #0c1017 100%);
   border: 1px solid rgba(56, 189, 248, 0.5);
   box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 30px rgba(56, 189, 248, 0.2);
@@ -168,20 +204,28 @@ html, body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  transform: translateY(12px);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal.visible .modal-scroll-card {
+  transform: none;
 }
 
 .modal-header {
   padding: 18px 24px;
-  border-bottom: 1px solid var(--border-gold);
+  border-bottom: 1px solid var(--accent-border);
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 16px;
   background: rgba(25, 30, 42, 0.6);
 }
 
-.modal-header h3 {
+.modal-header h2 {
   font-size: 20px;
-  color: var(--gold-light);
+  font-weight: 700;
+  color: var(--accent-light);
   letter-spacing: 2px;
   display: flex;
   align-items: center;
@@ -191,14 +235,16 @@ html, body {
 .modal-body {
   padding: 24px 28px;
   overflow-y: auto;
+  overscroll-behavior: contain;
   font-size: 14px;
   line-height: 1.8;
   color: #e2e8f0;
 }
 
-.modal-body h4 {
-  color: var(--gold-primary);
+.modal-body h3 {
+  color: var(--accent);
   font-size: 16px;
+  font-weight: 700;
   margin: 18px 0 8px;
   letter-spacing: 1px;
 }
@@ -206,10 +252,29 @@ html, body {
 .modal-body ul {
   padding-left: 20px;
   margin-bottom: 12px;
-  color: #cbd5e1;
+  color: var(--text-body);
 }
 
 .modal-body li {
   margin-bottom: 6px;
 }
 
+@media (max-width: 640px) {
+  .modal { padding: 10px; }
+  .modal-header { padding: 14px 16px; }
+  .modal-header h2 { font-size: 16px; letter-spacing: 1px; }
+  .modal-body { padding: 18px 18px; font-size: 13px; }
+}
+
+/* ==========================================================================
+   움직임 줄이기 설정 존중
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
