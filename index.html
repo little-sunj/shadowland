@@ -72,6 +72,16 @@
       <span class="hint-text hint-touch">밀어서 이동 | 두 손가락: 확대/축소 | 탭: 족자 열람</span>
     </div>
 
+    <!-- 확대/축소 버튼 -->
+    <div class="zoom-controls" role="group" aria-label="확대/축소">
+      <button type="button" id="btn-zoom-in" class="btn-oriental btn-zoom" aria-label="확대">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
+      </button>
+      <button type="button" id="btn-zoom-out" class="btn-oriental btn-zoom" aria-label="축소">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
+      </button>
+    </div>
+
     <!-- 지도 뷰포트: 포커스 시 방향키로 이동, +/- 확대, 0 복원 -->
     <main id="map-viewport" tabindex="0" aria-label="황량계 지도. 방향키로 이동, 더하기·빼기 키로 확대·축소, Tab으로 구역과 거점을 선택할 수 있습니다.">
       <div id="map-container">

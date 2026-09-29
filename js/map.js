@@ -34,6 +34,8 @@ class FantasyMap {
     this.mainScreen = document.getElementById('main-screen');
     this.dayNightBtn = document.getElementById('btn-daynight');
     this.nightBanner = document.querySelector('.night-warning-banner');
+    this.zoomInBtn = document.getElementById('btn-zoom-in');
+    this.zoomOutBtn = document.getElementById('btn-zoom-out');
 
     // 지도 기준 해상도 (SVG viewBox: 1400 x 1400)
     this.mapWidth = 1400;
@@ -243,10 +245,39 @@ class FantasyMap {
     const curW = this.mapWidth * scale;
     const curH = this.mapHeight * scale;
     const m = this.panMargin;
+    // 족자가 열려 있으면 그만큼 지도를 더 끌어낼 수 있게 해, 가장자리 거점도 보이는 영역에 올 수 있도록
+    const occ = this.panelOcclusion();
 
-    const x = curW <= vw ? (vw - curW) / 2 : Math.min(Math.max(tx, vw - curW - m), m);
-    const y = curH <= vh ? (vh - curH) / 2 : Math.min(Math.max(ty, vh - curH - m), m);
+    const x = curW <= vw ? (vw - curW) / 2 : Math.min(Math.max(tx, vw - curW - m - occ.right), m);
+    const y = curH <= vh ? (vh - curH) / 2 : Math.min(Math.max(ty, vh - curH - m - occ.bottom), m);
     return { x, y };
+  }
+
+  // 족자 패널이 화면 오른쪽(데스크톱) 또는 아래쪽(모바일 하단 시트)을 가리는 폭/높이(px)
+  panelOcclusion() {
+    const none = { right: 0, bottom: 0 };
+    if (!this.infoPanel || !this.infoPanel.classList.contains('active')) return none;
+    const { vw } = this.viewportSize();
+    const cs = getComputedStyle(this.infoPanel);
+    const w = this.infoPanel.offsetWidth;       // offset* 는 등장 애니메이션(transform)의 영향을 받지 않음
+    const h = this.infoPanel.offsetHeight;
+    const isSheet = w >= vw * 0.8;
+    return isSheet
+      ? { right: 0, bottom: h + (parseFloat(cs.bottom) || 0) }
+      : { right: w + (parseFloat(cs.right) || 0), bottom: 0 };
+  }
+
+  // 패널과 상단 HUD 에 가려지지 않는 '실제로 보이는' 영역의 중심 (뷰포트 좌표)
+  visibleCenter() {
+    const { vw, vh } = this.viewportSize();
+    const occ = this.panelOcclusion();
+    const hud = document.querySelector('.top-hud');
+    const vpTop = this.viewport.getBoundingClientRect().top;
+    const top = hud ? Math.max(0, hud.getBoundingClientRect().bottom - vpTop) : 0;
+    return {
+      x: (vw - occ.right) / 2,
+      y: top + (vh - occ.bottom - top) / 2
+    };
   }
 
   setTransform(tx, ty, scale) {
@@ -255,6 +286,7 @@ class FantasyMap {
     this.translateX = c.x;
     this.translateY = c.y;
     this.container.style.transform = `translate(${this.translateX}px, ${this.translateY}px) scale(${this.scale})`;
+    this.updateZoomButtons();
   }
 
   // 화면 좌표(sx, sy)를 고정점으로 확대/축소
@@ -329,12 +361,30 @@ class FantasyMap {
     this.animId = requestAnimationFrame(step);
   }
 
-  // 지도 좌표 (mapX, mapY)가 화면 중앙에 오도록 이동
+  // 지도 좌표 (mapX, mapY)가 '보이는 영역'의 중앙에 오도록 이동 (족자·HUD 에 가려지지 않게)
   panTo(mapX, mapY, targetScale = 1.25) {
-    const { vw, vh } = this.viewportSize();
+    const c = this.visibleCenter();
     const scale = this.clampScale(targetScale);
-    this.animateTo(vw / 2 - mapX * scale, vh / 2 - mapY * scale, scale);
+    this.animateTo(c.x - mapX * scale, c.y - mapY * scale, scale);
     this.isFitted = false;
+  }
+
+  // 보이는 영역 중심을 기준으로 부드럽게 확대/축소 (+/− 버튼, 키보드)
+  zoomBy(factor) {
+    const newScale = this.clampScale(this.scale * factor);
+    if (newScale === this.scale) return;
+    const c = this.visibleCenter();
+    const ratio = newScale / this.scale;
+    this.animateTo(c.x - (c.x - this.translateX) * ratio, c.y - (c.y - this.translateY) * ratio, newScale, 220);
+    this.isFitted = false;
+  }
+
+  // 확대/축소 한계에 닿으면 해당 버튼을 비활성화
+  updateZoomButtons() {
+    if (!this.zoomInBtn) return;
+    const eps = 1e-3;
+    this.zoomInBtn.disabled = this.scale >= this.maxScale - eps;
+    this.zoomOutBtn.disabled = this.scale <= this.minScale + eps;
   }
 
   // ------------------------------------------------------------------
@@ -462,7 +512,6 @@ class FantasyMap {
     this.viewport.addEventListener('keydown', (e) => {
       if (e.altKey || e.ctrlKey || e.metaKey) return;
       const step = 80;
-      const { vw, vh } = this.viewportSize();
       const moves = { ArrowLeft: [step, 0], ArrowRight: [-step, 0], ArrowUp: [0, step], ArrowDown: [0, -step] };
 
       if (moves[e.key]) {
@@ -472,10 +521,10 @@ class FantasyMap {
         this.isFitted = false;
       } else if (e.key === '+' || e.key === '=') {
         e.preventDefault();
-        this.zoomAt(vw / 2, vh / 2, this.scale * 1.2);
+        this.zoomBy(1.4);
       } else if (e.key === '-' || e.key === '_') {
         e.preventDefault();
-        this.zoomAt(vw / 2, vh / 2, this.scale / 1.2);
+        this.zoomBy(1 / 1.4);
       } else if (e.key === '0') {
         e.preventDefault();
         this.fitToScreen(true);
@@ -631,6 +680,10 @@ class FantasyMap {
     document.getElementById('btn-reset-view').addEventListener('click', () => {
       this.fitToScreen(true);
     });
+
+    this.zoomInBtn.addEventListener('click', () => this.zoomBy(1.4));
+    this.zoomOutBtn.addEventListener('click', () => this.zoomBy(1 / 1.4));
+    this.updateZoomButtons();
   }
 
   toggleDayNight() {

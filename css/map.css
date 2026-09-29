@@ -136,6 +136,39 @@
 }
 
 /* ==========================================================================
+   확대/축소 버튼 (조작 안내 위, 좌측 하단)
+   ========================================================================== */
+.zoom-controls {
+  position: absolute;
+  left: 24px;
+  bottom: 76px;
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: opacity 0.3s ease;
+}
+
+.btn-zoom {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  justify-content: center;
+  letter-spacing: 0;
+}
+
+.btn-zoom:disabled {
+  opacity: 0.35;
+  cursor: default;
+  transform: none;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+  border-color: var(--accent-border);
+  color: #e2e8f0;
+}
+
+.btn-zoom:disabled::before { display: none; }
+
+/* ==========================================================================
    동양풍 족자(Scroll) 정보 패널
    ========================================================================== */
 #info-panel {
@@ -683,8 +716,22 @@
     max-height: 62%;
   }
 
-  #main-screen.panel-open .map-hint {
+  .zoom-controls {
+    left: auto;
+    right: 12px;
+    bottom: max(12px, env(safe-area-inset-bottom));
+  }
+
+  .btn-zoom {
+    width: 44px;
+    height: 44px;
+  }
+
+  /* 하단 시트가 열리면 하단 컨트롤은 숨김 */
+  #main-screen.panel-open .map-hint,
+  #main-screen.panel-open .zoom-controls {
     opacity: 0;
+    pointer-events: none;
   }
 
   .scroll-body {
