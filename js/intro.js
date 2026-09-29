@@ -35,9 +35,9 @@ class IntroManager {
     const g = sprite.getContext('2d');
     const half = size / 2;
     const grad = g.createRadialGradient(half, half, 0, half, half, half);
-    grad.addColorStop(0, 'rgba(32, 40, 54, 1)');
-    grad.addColorStop(0.5, 'rgba(18, 22, 30, 0.53)');
-    grad.addColorStop(1, 'rgba(10, 12, 16, 0)');
+    grad.addColorStop(0, 'rgba(40, 36, 32, 1)');
+    grad.addColorStop(0.5, 'rgba(22, 19, 16, 0.53)');
+    grad.addColorStop(1, 'rgba(14, 12, 10, 0)');
     g.fillStyle = grad;
     g.fillRect(0, 0, size, size);
     return sprite;

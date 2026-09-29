@@ -98,16 +98,15 @@ class FantasyMap {
       }
 
       if (region.label) {
-        const { x, y, size, fill, subFill, sub } = region.label;
+        const { x, y, size } = region.label;
         const title = svgEl('text', {
-          x, y, class: 'map-text region-label', 'text-anchor': 'middle',
-          'font-size': size, fill
+          x, y, class: 'map-text region-label', 'text-anchor': 'middle', 'font-size': size
         });
         title.textContent = region.name.split('').join(' ');
         const subtitle = svgEl('text', {
-          x, y: y + (size >= 24 ? 25 : 23), class: 'map-text region-sublabel', 'text-anchor': 'middle', fill: subFill
+          x, y: y + (size >= 24 ? 25 : 23), class: 'map-text region-sublabel', 'text-anchor': 'middle'
         });
-        subtitle.textContent = sub;
+        subtitle.textContent = region.hanja;
         labelsLayer.append(title, subtitle);
       }
     });
@@ -628,7 +627,7 @@ class FantasyMap {
         <div class="panel-title-wrap">
           <h2 class="panel-name" id="panel-title">${e(data.name)}</h2>
           <span class="panel-hanja">${e(data.hanja)}</span>
-          <span class="seal-stamp" aria-hidden="true">法</span>
+          <span class="seal-stamp" aria-hidden="true">${e(data.seal || '法')}</span>
         </div>
       </div>
 

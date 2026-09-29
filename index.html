@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="description" content="황량계(荒涼界) — 동양 판타지 세계관 인터랙티브 전도">
-  <meta name="theme-color" content="#070a10">
+  <meta name="theme-color" content="#0e0c0a">
   <title>황량계 (荒涼界) | 동양 판타지 인터랙티브 전도</title>
 
   <!-- 웹폰트: CSS @import 대신 head에서 병렬 로드 (실제 사용하는 굵기만) -->
@@ -97,13 +97,15 @@
 
           <!-- 1. 지도 배경 이미지 -->
           <image id="map-bg-image" href="assets/images/map.webp" x="0" y="0" width="1400" height="1400" preserveAspectRatio="none" />
+          <!-- 야간 달빛 틴트 (야간 모드에서만 보임) -->
+          <rect id="night-tint" x="0" y="0" width="1400" height="1400" fill="#4a5f94" />
 
           <!-- 2. 구역 폴리곤 — js/data.js 의 regions[].polygon 으로 생성 -->
           <g id="regions-layer"></g>
 
           <!-- 3. 주간 뱃길 (야간에는 사라짐) -->
           <g id="day-shipping-route" class="map-decor">
-            <path d="M 640,630 C 720,610 820,610 880,640" stroke="#f59e0b" stroke-width="2.5" stroke-dasharray="6,5" fill="none" opacity="0.9" />
+            <path class="route-line" d="M 640,630 C 720,610 820,610 880,640" stroke-width="2.5" stroke-dasharray="6,5" fill="none" opacity="0.9" />
             <text x="760" y="605" class="map-text route-label" text-anchor="middle">⚓ 주간 유일 뱃길</text>
           </g>
 
@@ -136,7 +138,7 @@
          ================================================================== -->
     <aside id="info-panel" aria-labelledby="panel-title" inert>
       <div class="scroll-rod" aria-hidden="true"></div>
-      <button type="button" id="btn-close-scroll" class="btn-close" aria-label="족자 닫기">✕</button>
+      <button type="button" id="btn-close-scroll" class="btn-close on-hanji" aria-label="족자 닫기">✕</button>
       <div class="scroll-body">
         <div id="panel-content" aria-live="polite"></div>
       </div>
@@ -154,7 +156,7 @@
     <div class="modal-scroll-card">
       <div class="modal-header">
         <h2 id="lore-modal-title"><span class="seal-stamp" aria-hidden="true">記</span> 황량계(荒涼界) 세계관 비록(秘錄)</h2>
-        <button type="button" class="btn-close" data-close-modal aria-label="세계관 닫기">✕</button>
+        <button type="button" class="btn-close on-hanji" data-close-modal aria-label="세계관 닫기">✕</button>
       </div>
       <div class="modal-body" id="lore-modal-body"></div>
     </div>
@@ -164,7 +166,7 @@
     <div class="modal-scroll-card">
       <div class="modal-header">
         <h2 id="characters-modal-title"><span class="seal-stamp" aria-hidden="true">人</span> 황량계(荒涼界) 주요 인물</h2>
-        <button type="button" class="btn-close" data-close-modal aria-label="등장인물 닫기">✕</button>
+        <button type="button" class="btn-close on-hanji" data-close-modal aria-label="등장인물 닫기">✕</button>
       </div>
       <div class="modal-body" id="characters-modal-body"></div>
     </div>
