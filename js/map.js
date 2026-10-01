@@ -45,7 +45,7 @@ class FantasyMap {
     // 지도 기준 해상도 = 지도 이미지 픽셀 크기 (js/data.js 의 map)
     this.mapWidth = data.map.width;
     this.mapHeight = data.map.height;
-    this.panMargin = 60;        // 지도 가장자리 바깥으로 끌어낼 수 있는 여유(px)
+    this.panMargin = 0;         // 지도 가장자리 바깥으로 끌어낼 수 있는 여유(px) — 0: 빈 공간이 보이지 않게
 
     // 변환 상태
     this.scale = 1;
@@ -98,6 +98,10 @@ class FantasyMap {
     tint.setAttribute('height', height);
     this.container.style.width = `${width}px`;
     this.container.style.height = `${height}px`;
+    // 족자를 열어 지도가 밀릴 때 드러나는 가장자리를 흐린 지도로 채우는 배경
+    // (CSS 변수 속 url 은 css 폴더 기준으로 풀리므로 절대 경로로 넘깁니다)
+    const absUrl = new URL(image, document.baseURI).href;
+    this.viewport.style.setProperty('--map-image', `url("${absUrl}")`);
   }
 
   buildMap() {
@@ -302,14 +306,15 @@ class FantasyMap {
     };
   }
 
+  // 지도가 화면을 빈틈없이 꽉 채우는 배율 (CSS 의 background-size: cover 와 같은 방식)
   computeFitScale() {
     const { vw, vh } = this.viewportSize();
-    return Math.min(vw / this.mapWidth, vh / this.mapHeight) * 0.92;
+    return Math.max(vw / this.mapWidth, vh / this.mapHeight);
   }
 
   updateScaleLimits() {
     const fit = this.computeFitScale();
-    this.minScale = fit * 0.6;
+    this.minScale = fit;                // 이보다 축소하면 지도 바깥(빈 공간)이 보이므로 막습니다
     // 원본 이미지 픽셀 기준 최대 배율 (이보다 크게 확대하면 흐려짐). 아주 큰 화면에서는 맞춤 배율의 2배까지
     this.maxScale = Math.max(this.data.map.maxScale || 1.6, fit * 2);
   }
@@ -497,6 +502,10 @@ class FantasyMap {
       this.pointers.delete(e.pointerId);
       // 두 손가락 → 한 손가락이 되면 남은 손가락으로 계속 이동할 수 있도록 재시작
       this.startGesture();
+      // 모든 포인터가 떨어지면, 이번 드래그 직후의 click 만 막고 플래그는 곧바로 풀어 둡니다
+      if (this.pointers.size === 0 && this.suppressClick) {
+        setTimeout(() => { this.suppressClick = false; }, 0);
+      }
     };
     window.addEventListener('pointerup', endPointer);
     window.addEventListener('pointercancel', endPointer);
@@ -691,7 +700,8 @@ class FantasyMap {
 
   // 세력권 반지름이 화면에서 적당한 크기(약 120px)로 보이는 배율
   focusScale(radius) {
-    return Math.min(this.maxScale, Math.max(this.computeFitScale() * 1.6, 120 / (radius || 120)));
+    // 작은 지점도 주변이 보이도록 원본 크기(1배) 조금 넘는 정도까지만 확대
+    return Math.min(this.maxScale, 1.1, Math.max(this.computeFitScale() * 1.4, 120 / (radius || 120)));
   }
 
   updateSelectionHighlight() {

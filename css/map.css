@@ -20,6 +20,23 @@
   outline: none;
 }
 
+/* 지도 뒤 배경: 같은 지도를 크게 흐려 깔아 두어, 지도가 밀려도 검은 빈 공간 대신 안개처럼 이어지게 */
+#map-viewport::before {
+  content: '';
+  position: absolute;
+  inset: -60px;
+  background: var(--map-image) center / cover no-repeat, var(--bg-map);
+  filter: blur(40px) brightness(0.92);
+  transition: filter 0.8s ease;
+  pointer-events: none;
+}
+
+#main-screen.night-mode #map-viewport::before {
+  background: var(--map-image) center / cover no-repeat, var(--night-tint);
+  background-blend-mode: multiply;
+  filter: blur(40px) brightness(0.55) saturate(0.6);
+}
+
 #map-viewport.is-dragging {
   cursor: grabbing;
 }
@@ -41,7 +58,6 @@
   height: 1856px;
   transform-origin: 0 0;
   /* transform 은 JS 가 매 프레임 직접 지정 — CSS transition 을 두면 입력이 밀립니다 */
-  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.85), 0 0 0 1px var(--border-subtle);
   border-radius: 2px;
 }
 
