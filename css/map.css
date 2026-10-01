@@ -31,12 +31,6 @@
   pointer-events: none;
 }
 
-#main-screen.night-mode #map-viewport::before {
-  background: var(--map-image) center / cover no-repeat, var(--night-tint);
-  background-blend-mode: multiply;
-  filter: blur(40px) brightness(0.55) saturate(0.6);
-}
-
 #map-viewport.is-dragging {
   cursor: grabbing;
 }
@@ -119,17 +113,6 @@
 .util-controls {
   display: flex;
   gap: 8px;
-}
-
-/* 주야간 모드 버튼 */
-#btn-daynight {
-  border-color: var(--accent);
-}
-
-#btn-daynight[aria-pressed="true"] {
-  border-color: var(--night-btn-border);
-  background: linear-gradient(180deg, rgba(var(--night-btn-top-rgb), 0.9) 0%, rgba(var(--night-btn-bottom-rgb), 0.95) 100%);
-  color: var(--night-btn-text);
 }
 
 /* ==========================================================================
@@ -439,9 +422,9 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  background: rgba(var(--accent-dark-rgb), 0.1);
-  border: 1px solid rgba(var(--accent-dark-rgb), 0.4);
-  color: var(--ink-muted);
+  background: rgba(var(--vermilion-rgb), 0.1);
+  border: 1px solid rgba(var(--vermilion-rgb), 0.45);
+  color: var(--vermilion-dark);
 }
 
 /* 족자 속 바로가기 버튼 (지점 ↔ 구역 ↔ 거점) */
@@ -474,12 +457,6 @@
 .panel-notice .icon {
   width: 18px;
   height: 18px;
-}
-
-.panel-notice.is-night {
-  background: rgba(var(--vermilion-rgb), 0.1);
-  border-color: rgba(var(--vermilion-rgb), 0.45);
-  color: var(--vermilion-dark);
 }
 
 /* ==========================================================================
@@ -550,9 +527,8 @@
   pointer-events: none;
 }
 
-.map-marker .map-text,
-#monster-group .map-text {
-  stroke-width: 3.5px;             /* 마커·괴수는 확대된 그룹 안이라 외곽선을 얇게 */
+.map-marker .map-text {
+  stroke-width: 3.5px;             /* 마커는 확대된 그룹 안이라 외곽선을 얇게 */
 }
 
 .region-label {
@@ -576,12 +552,6 @@
 
 .route-line {
   stroke: var(--vermilion);
-}
-
-.monster-label {
-  font-size: 11px;
-  font-weight: 700;
-  fill: var(--danger-light);
 }
 
 .stamp-box {
@@ -691,135 +661,12 @@
   opacity: 1;
 }
 
-/* ==========================================================================
-   야간 모드 (Night Mode)
-   ========================================================================== */
-
-#main-screen.night-mode {
-  background: var(--bg-night);
-}
-
-/* 필터는 배경 이미지 한 곳에만 — 마커·지명은 밤에도 선명하게 유지됩니다 */
-#map-bg-image {
-  transition: filter 0.8s ease;
-}
-
-/* 색을 회전시키지 않고, 채도를 낮춘 뒤 달빛 남색을 곱해(multiply) 땅·바다 명암을 유지합니다 */
-#main-screen.night-mode #map-bg-image {
-  filter: brightness(0.9) saturate(0.6) contrast(1.1);
-}
-
-#night-tint {
-  fill: var(--night-tint);
-  mix-blend-mode: multiply;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.8s ease;
-}
-
-#main-screen.night-mode #night-tint {
-  opacity: 1;
-}
-
-/* 밤에는 지명을 밝은 글씨 + 어두운 외곽선으로 */
-#main-screen.night-mode .map-text {
-  stroke: rgba(var(--night-halo-rgb), 0.75);
-}
-
-#main-screen.night-mode .region-label,
-#main-screen.night-mode .marker-label {
-  fill: var(--night-label);
-}
-
-#main-screen.night-mode .region-sublabel {
-  fill: var(--night-sublabel);
-}
-
-
-#main-screen.night-mode .map-marker:hover .marker-label,
-#main-screen.night-mode .map-marker.is-selected .marker-label {
-  fill: var(--danger-light);
-}
-
-#main-screen.night-mode .stamp-box {
-  fill: rgba(var(--ink-panel-rgb), 0.8);
-}
-
-/* 주간 뱃길: 밤에는 닫힘 */
-#day-shipping-route {
-  transition: opacity 0.8s ease;
-}
-
-#main-screen.night-mode #day-shipping-route {
-  opacity: 0;
-}
-
-/* SVG 필터·괴수 색 (index.html 의 SVG 도 색은 CSS 변수로) */
 /* 지도 위 라벨 아이콘 (위치는 js 의 layoutMapIcons 가 맞춤) */
 .map-icon { pointer-events: none; }
 .route-icon { color: var(--vermilion-dark); }
-.monster-icon { color: var(--danger-light); }
 
+/* SVG 필터 색 (index.html 의 SVG 도 색은 CSS 변수로) */
 #marker-glow feDropShadow { flood-color: var(--marker-glow); }
-#red-glow feDropShadow { flood-color: var(--danger); }
-.monster-body { fill: var(--monster-body); stroke: var(--danger); }
-.monster-eye { fill: var(--monster-eye); }
-
-/* 황해 괴수: 밤에만 등장, 클릭 시 '황해 중심 소용돌이' 열람 */
-#monster-group {
-  opacity: 0;
-  pointer-events: none;
-  cursor: pointer;
-  transition: opacity 1.2s ease;
-  transform-box: fill-box;        /* 자기 중심 기준으로 흔들리도록 */
-  transform-origin: center;
-  outline: none;
-}
-
-#main-screen.night-mode #monster-group {
-  opacity: 0.9;
-  pointer-events: all;
-  animation: monsterPulse 3.5s infinite alternate ease-in-out;
-}
-
-@keyframes monsterPulse {
-  0% { transform: scale(0.97) rotate(-1deg); filter: drop-shadow(0 0 10px rgba(var(--danger-rgb), 0.4)); }
-  100% { transform: scale(1.03) rotate(1deg); filter: drop-shadow(0 0 25px rgba(var(--danger-rgb), 0.9)); }
-}
-
-/* 야간 경고 배너 */
-.night-warning-banner {
-  position: absolute;
-  top: 84px;
-  left: 50%;
-  transform: translateX(-50%);
-  max-width: calc(100vw - 32px);
-  background: rgba(var(--alert-rgb), 0.92);
-  border: 1px solid var(--alert-border);
-  color: var(--alert-text);
-  padding: 8px 24px;
-  border-radius: 20px;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  text-align: center;
-  z-index: 120;
-  box-shadow: 0 0 25px rgba(var(--danger-rgb), 0.5);
-  display: none;
-  align-items: center;
-  gap: 8px;
-  pointer-events: none;
-  animation: pulseWarning 2s infinite ease-in-out;
-}
-
-#main-screen.night-mode .night-warning-banner {
-  display: flex;
-}
-
-@keyframes pulseWarning {
-  0%, 100% { opacity: 0.85; transform: translateX(-50%) scale(1); }
-  50% { opacity: 1; transform: translateX(-50%) scale(1.03); }
-}
 
 /* ==========================================================================
    반응형 — 태블릿 / 모바일
@@ -847,7 +694,7 @@
 
   .util-controls {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 6px;
   }
 
@@ -856,14 +703,6 @@
     padding: 8px 4px;
     font-size: 12px;
     letter-spacing: 0;
-  }
-
-  .night-warning-banner {
-    top: 104px;
-    font-size: 11px;
-    letter-spacing: 0;
-    padding: 6px 14px;
-    width: max-content;
   }
 
   .map-hint {

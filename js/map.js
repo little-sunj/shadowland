@@ -1,5 +1,5 @@
 // ==========================================================================
-// 황량계(荒涼界) 인터랙티브 지도 — 이동/확대, 구역·거점 선택, 족자 패널, 주야간
+// 황량계(荒涼界) 인터랙티브 지도 — 이동/확대, 구역·거점 선택, 족자 패널
 // ==========================================================================
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -37,8 +37,6 @@ class FantasyMap {
     this.infoPanel = document.getElementById('info-panel');
     this.panelContent = document.getElementById('panel-content');
     this.mainScreen = document.getElementById('main-screen');
-    this.dayNightBtn = document.getElementById('btn-daynight');
-    this.nightBanner = document.querySelector('.night-warning-banner');
     this.zoomInBtn = document.getElementById('btn-zoom-in');
     this.zoomOutBtn = document.getElementById('btn-zoom-out');
 
@@ -62,7 +60,6 @@ class FantasyMap {
     this.dragThreshold = 6;
 
     this.animId = null;
-    this.isNight = false;
     this.selection = null;       // { kind, id, landmark }
     this.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     this.canHover = window.matchMedia('(hover: hover)');   // 터치 기기에서는 호버 툴팁 생략
@@ -93,9 +90,6 @@ class FantasyMap {
     img.setAttribute('href', image);
     img.setAttribute('width', width);
     img.setAttribute('height', height);
-    const tint = document.getElementById('night-tint');
-    tint.setAttribute('width', width);
-    tint.setAttribute('height', height);
     this.container.style.width = `${width}px`;
     this.container.style.height = `${height}px`;
     // 족자를 열어 지도가 밀릴 때 드러나는 가장자리를 흐린 지도로 채우는 배경
@@ -165,19 +159,6 @@ class FantasyMap {
 
     // 소거점
     this.data.landmarks.forEach((lm) => {
-      if (lm.anchor === 'monster') {
-        // 별도 핀 없이 야간 괴수 실루엣에 연결
-        const monster = document.getElementById('monster-group');
-        if (monster) {
-          monster.setAttribute('role', 'button');
-          monster.setAttribute('aria-label', `${lm.name}(${lm.hanja}) — 족자 열기`);
-          this.bindSelectable(monster, {
-            tooltip: `◈ ${lm.name} (${lm.hanja}) - ${lm.type}`,
-            activate: () => this.selectLandmark(lm)
-          });
-        }
-        return;
-      }
       if (lm.x !== undefined) {
         markersLayer.appendChild(this.createMarker(lm, {
           major: false,
@@ -762,18 +743,15 @@ class FantasyMap {
     const landmarkHtml = landmark ? placeBox('선택된 거점', landmark) : '';
     const keyPlaceHtml = data.keyPlace ? placeBox('본거지', data.keyPlace) : '';
 
-    let noticeHtml = '';
-    if (data.notice) {
-      const night = this.isNight;
-      noticeHtml = `
-        <div class="panel-notice${night ? ' is-night' : ''}">
-          ${iconHtml(night ? 'warning' : 'anchor')}
+    // 주의 안내 (예: 황해의 항해 경고) — data 의 notice: { title, text }
+    const noticeHtml = data.notice ? `
+        <div class="panel-notice">
+          ${iconHtml('warning')}
           <div>
-            <strong>${night ? '야간 해수(괴수) 출몰 경고' : '주간 항해 안내'}:</strong><br>
-            ${e(night ? data.notice.night : data.notice.day)}
+            <strong>${e(data.notice.title)}:</strong><br>
+            ${e(data.notice.text)}
           </div>
-        </div>`;
-    }
+        </div>` : '';
 
     const rel = this.relatedLinks(kind, data);
     const linksHtml = rel.links.length ? `
@@ -842,18 +820,12 @@ class FantasyMap {
   }
 
   // ------------------------------------------------------------------
-  // 상단 컨트롤 / 주야간
+  // 상단 컨트롤
   // ------------------------------------------------------------------
   bindControls() {
     document.getElementById('btn-close-scroll').addEventListener('click', () => {
       this.closeInfoPanel();
       this.viewport.focus({ preventScroll: true });
-    });
-
-    this.dayNightBtn.addEventListener('click', () => this.toggleDayNight());
-
-    document.getElementById('btn-reset-view').addEventListener('click', () => {
-      this.fitToScreen(true);
     });
 
     // 족자 속 바로가기 버튼
@@ -865,37 +837,5 @@ class FantasyMap {
     this.zoomInBtn.addEventListener('click', () => this.zoomBy(1.4));
     this.zoomOutBtn.addEventListener('click', () => this.zoomBy(1 / 1.4));
     this.updateZoomButtons();
-  }
-
-  toggleDayNight() {
-    this.isNight = !this.isNight;
-    this.mainScreen.classList.toggle('night-mode', this.isNight);
-
-    this.dayNightBtn.setAttribute('aria-pressed', String(this.isNight));
-    this.dayNightBtn.querySelector('use').setAttribute('href', this.isNight ? '#i-moon' : '#i-sun');
-    this.dayNightBtn.querySelector('.btn-label').textContent = this.isNight ? '야간' : '주간';
-
-    // 스크린리더에 알리도록 배너 문구는 야간 전환 시에만 채웁니다
-    this.nightBanner.innerHTML = this.isNight
-      ? `${iconHtml('warning')}<span>[ 야간 경보 ] 황해 심해 괴수 출몰 중! 야간 해상 횡단 절대 불가</span>`
-      : '';
-
-    // 괴수는 야간에만 키보드로 선택 가능
-    const monster = document.getElementById('monster-group');
-    if (monster) {
-      if (this.isNight) {
-        monster.setAttribute('tabindex', '0');
-        monster.removeAttribute('aria-hidden');
-      } else {
-        monster.removeAttribute('tabindex');
-        monster.setAttribute('aria-hidden', 'true');
-      }
-    }
-
-    // 열려 있는 족자에 주/야간 안내가 있으면 선택 상태(거점 포함)를 유지한 채 갱신
-    const sel = this.selection;
-    if (this.isPanelOpen() && sel && this.entry(sel.kind, sel.id)?.notice) {
-      this.renderInfoPanel();
-    }
   }
 }

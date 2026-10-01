@@ -13,7 +13,6 @@
   /* 먹 (배경) */
   --bg-deep: #0e0c0a;          --bg-rgb: 14, 12, 10;
   --bg-map: #14110e;                                   /* 지도 바깥 여백 */
-  --bg-night: #0b0907;                                 /* 야간 지도 바깥 여백 */
   --ink-panel-rgb: 20, 17, 14;                         /* 툴팁·안내 알약 등 어두운 반투명 판 */
   --backdrop-rgb: 10, 8, 6;                            /* 모달 뒤 어둡게 가리는 막 */
 
@@ -64,25 +63,6 @@
 
   /* 지도 위 거점 강조 광채 */
   --marker-glow: #f59e0b;      --marker-glow-rgb: 245, 158, 11;
-
-  /* 경고 / 괴수 */
-  --danger: #ef4444;           --danger-rgb: 239, 68, 68;
-  --danger-light: #fca5a5;
-  --alert-rgb: 120, 22, 16;                            /* 야간 경고 배너 */
-  --alert-border: #e0685c;
-  --alert-text: #fee2e2;
-  --monster-body: #450a0a;
-  --monster-eye: #fef08a;
-
-  /* 야간 (달빛) */
-  --night-tint: #4a5f94;                               /* 지도에 곱해지는 달빛 남색 */
-  --night-label: #e9eef7;
-  --night-sublabel: #9fb6d6;
-  --night-halo-rgb: 5, 8, 16;
-  --night-btn-border: #818cf8;
-  --night-btn-text: #c7d2fe;
-  --night-btn-top-rgb: 30, 27, 75;
-  --night-btn-bottom-rgb: 15, 23, 42;
 
   /* 인트로 (안개) — js/intro.js 의 안개 입자도 이 값을 읽어 갑니다 */
   --intro-bg: #080706;

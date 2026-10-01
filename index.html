@@ -21,17 +21,8 @@
 </head>
 <body>
 
-  <!-- 아이콘 모음 (이모지 대신 사용 — OS 마다 모양이 달라지지 않도록). 사용: <svg class="icon"><use href="#i-sun"/></svg> -->
+  <!-- 아이콘 모음 (이모지 대신 사용 — OS 마다 모양이 달라지지 않도록). 사용: <svg class="icon"><use href="#i-anchor"/></svg> -->
   <svg class="icon-sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-    <symbol id="i-sun" viewBox="0 0 24 24">
-      <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
-        <circle cx="12" cy="12" r="4" />
-        <path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8" />
-      </g>
-    </symbol>
-    <symbol id="i-moon" viewBox="0 0 24 24">
-      <path d="M20 14.6A8.2 8.2 0 1 1 9.4 4a6.6 6.6 0 0 0 10.6 10.6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
-    </symbol>
     <symbol id="i-warning" viewBox="0 0 24 24">
       <path d="M12 3.2 2.3 20.3h19.4L12 3.2z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
       <path d="M12 9.5v5" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
@@ -86,13 +77,8 @@
       <nav class="util-controls" aria-label="지도 도구">
         <button type="button" id="btn-lore-modal" class="btn-oriental" aria-haspopup="dialog">세계관</button>
         <button type="button" id="btn-characters-modal" class="btn-oriental" aria-haspopup="dialog">등장인물</button>
-        <button type="button" id="btn-daynight" class="btn-oriental" aria-pressed="false"><svg class="icon" aria-hidden="true"><use href="#i-sun" /></svg><span class="btn-label">주간</span></button>
-        <button type="button" id="btn-reset-view" class="btn-oriental">전도 복원</button>
       </nav>
     </header>
-
-    <!-- 야간 모드 시 황해 괴수 경고 배너 -->
-    <div class="night-warning-banner" role="status" aria-live="polite"></div>
 
     <!-- 하단 조작 안내 힌트 (입력 장치에 따라 문구가 바뀝니다) -->
     <div class="map-hint" aria-hidden="true">
@@ -119,9 +105,6 @@
             <filter id="marker-glow" x="-50%" y="-50%" width="200%" height="200%">
               <feDropShadow dx="0" dy="0" stdDeviation="4" flood-opacity="0.85" />
             </filter>
-            <filter id="red-glow" x="-50%" y="-50%" width="200%" height="200%">
-              <feDropShadow dx="0" dy="0" stdDeviation="6" flood-opacity="0.9" />
-            </filter>
             <!-- 구역 하이라이트를 수묵처럼 번지게 -->
             <filter id="region-soft" x="-10%" y="-10%" width="120%" height="120%">
               <feGaussianBlur stdDeviation="22" />
@@ -130,40 +113,27 @@
 
           <!-- 1. 지도 배경 이미지 (경로·크기는 js/data.js 의 map 값으로 다시 설정됩니다) -->
           <image id="map-bg-image" href="assets/images/shadowland_map.webp" x="0" y="0" width="2464" height="1856" preserveAspectRatio="none" />
-          <!-- 야간 달빛 틴트 (야간 모드에서만 보임) -->
-          <rect id="night-tint" x="0" y="0" width="2464" height="1856" />
 
           <!-- 2. 구역 경계 — js/data.js 의 regions[].polygon 으로 생성 -->
           <g id="regions-layer"></g>
 
-          <!-- 3. 주간 뱃길 (야간에는 사라짐) -->
+          <!-- 3. 주간 뱃길 -->
           <g id="day-shipping-route" class="map-decor">
             <path class="route-line" d="M 790,985 C 960,1060 1330,1065 1525,955" stroke-width="4.5" stroke-dasharray="13,10" fill="none" opacity="0.9" />
             <text x="1150" y="1010" class="map-text route-label" text-anchor="middle">주간 유일 뱃길</text>
             <use class="map-icon route-icon" href="#i-anchor" width="22" height="22" />
           </g>
 
-          <!-- 4. 야간 황해 괴수 (야간에만 표시, 클릭 시 '황해 중심 소용돌이' 거점 열람) -->
-          <g id="monster-group" aria-hidden="true">
-            <g transform="translate(1150 870) scale(1.6)">
-              <ellipse class="monster-body" cx="0" cy="0" rx="42" ry="24" stroke-width="2" />
-            <circle class="monster-eye" cx="-14" cy="-4" r="3" filter="url(#red-glow)" />
-            <circle class="monster-eye" cx="14" cy="-4" r="3" filter="url(#red-glow)" />
-            <text x="0" y="40" class="map-text monster-label" text-anchor="middle">황해 심해 괴수</text>
-            <use class="map-icon monster-icon" href="#i-warning" width="13" height="13" />
-           </g>
-          </g>
-
-          <!-- 5. 지명 라벨 — regions[].label 로 생성 -->
+          <!-- 4. 지명 라벨 — regions[].label 로 생성 -->
           <g id="labels-layer" class="map-decor" aria-hidden="true"></g>
 
-          <!-- 6. 지점 세력권 고리 (호버·선택 시 표시) — sites[].radius -->
+          <!-- 5. 지점 세력권 고리 (호버·선택 시 표시) — sites[].radius -->
           <g id="rings-layer" class="map-decor" aria-hidden="true"></g>
 
-          <!-- 7. 지점·거점 마커 — sites[] · landmarks[] 로 생성 -->
+          <!-- 6. 지점·거점 마커 — sites[] · landmarks[] 로 생성 -->
           <g id="markers-layer"></g>
 
-          <!-- 8. 좌측 하단 고지도 낙관 도장 -->
+          <!-- 7. 우측 하단 고지도 낙관 도장 -->
           <g id="map-legend-stamp" class="map-decor" transform="translate(2180, 1730) scale(1.6)" aria-hidden="true">
             <rect class="stamp-box" x="0" y="0" width="130" height="60" rx="3" />
             <text class="map-text stamp-title" x="16" y="25">荒涼界 輿地圖</text>
