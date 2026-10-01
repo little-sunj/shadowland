@@ -1,20 +1,38 @@
 // ==========================================================================
 // 황량계(荒涼界) 세계관 데이터 — 지도·족자·모달이 모두 이 파일 하나를 기준으로 그려집니다.
-// 좌표는 모두 지도 SVG 좌표계(viewBox 0 0 1400 1400) 기준입니다.
-// label: 지명 위치/크기 (부제에는 한자가 표시됩니다) · seal: 족자 낙관 글자
+//
+// 좌표는 지도 이미지의 픽셀 좌표(0~2464, 0~1856)입니다.
+//  map       : 지도 이미지와 크기, 최대 확대 배율, 마커 크기 배율
+//  regions   : 지도 구역 (북부·서부·동부·남부·황해) — polygon 이 구역 경계
+//              (선택 시 카메라는 경계에 맞춰 자동 계산. 직접 정하려면 focus: { x, y, scale } 추가)
+//  sites     : 각 구역의 주요 지점 (유령곡·추라대·명조궁·흑사당) — radius 가 세력권(규모)
+//  landmarks : 소거점 — parent 가 있으면 그 지점의 족자에, 없으면 소속 구역 족자에 표시
+//  pin.shape : peak(삼각) · keep(사각) · palace(마름모) · serpent(뱀) · mist(안개) · cave(동굴) · village(점)
+//  seal      : 족자에 찍히는 낙관 글자
 // ==========================================================================
 const WORLD_DATA = {
   worldName: "황량계",
   worldHanja: "荒涼界",
   worldDescription: "국가도, 법도, 왕도도 없으며 오직 힘과 권력만이 유일한 법인 날것 그대로의 무법 대륙입니다.",
-
-  // 세계관 모달에서 구역이 나열되는 순서
-  loreOrder: ["hwanghae", "yuryeonggok", "churadae", "myeongjogung", "heuksadang", "villages"],
-
+  map: {
+    image: "assets/images/shadowland_map.webp",
+    width: 2464,
+    height: 1856,
+    maxScale: 1.6,
+    markerScale: 1.7,
+    intro: { x: 1150, y: 870 }
+  },
+  loreOrder: [
+    "hwanghae",
+    "yuryeonggok",
+    "churadae",
+    "myeongjogung",
+    "heuksadang",
+    "villages"
+  ],
   regions: {
     hwanghae: {
       id: "hwanghae",
-      seal: "海",            // 족자에 찍히는 낙관 글자
       name: "황해",
       hanja: "荒海",
       direction: "중심부",
@@ -30,24 +48,111 @@ const WORLD_DATA = {
         "낮에만 횡단 가능한 목숨을 건 뱃길",
         "소용돌이와 검은 해류가 휘몰아치는 험로"
       ],
-      // 주/야간에 따라 족자 하단에 표시되는 안내
       notice: {
         day: "현재 주간입니다. 황해의 유일한 뱃길이 열려 있으나, 해가 지기 전에 반드시 건너야 합니다.",
         night: "밤에는 심해 괴수가 솟구치므로 야간 횡단은 자살 행위입니다. 모든 뱃길이 닫혔습니다."
       },
-      // 세계관 모달용 요약 (HTML 허용: <strong> 등)
       loreBullets: [
         "황량계 대륙의 정중앙에 위치한 거대한 바다로, 4대 구역의 경계입니다.",
         "<strong>밤에는 바다 괴수가 출몰</strong>하므로, 배로 건너려면 반드시 낮에만 이동해야 합니다."
       ],
+      seal: "海",
       color: "#60a5fa",
-      label: { x: 760, y: 635, size: 22 },
-      focus: { x: 760, y: 650, scale: 1.45 },
-      polygon: "640,510 740,500 810,550 860,610 930,670 950,740 900,800 840,780 780,740 700,730 630,730 620,680 645,615 680,565"
+      label: { x: 1150, y: 720, size: 42 },
+      polygon: "820,640 1000,560 1250,560 1480,620 1560,760 1520,960 1380,1080 1150,1110 920,1060 780,930 760,780"
     },
+    north: {
+      id: "north",
+      name: "북부",
+      hanja: "北部",
+      direction: "황량계 북방",
+      category: "고산 설원 지대",
+      ruler: "유령곡의 야수와 버려진 자들",
+      dangerLevel: "★★★★★ (극위험)",
+      summary: "구름 위로 솟은 설산과 칼바람의 고지대. 황량계에서 사람의 발길이 가장 드문 땅.",
+      description: `황량계의 북쪽을 가로막은 고산 지대입니다. 만년설을 인 봉우리들이 구름 위로 솟아 있고, 봉우리 사이 깊은 골짜기로는 쉼 없이 칼바람이 몰아칩니다.
+인적이 거의 닿지 않아 길을 아는 자가 드물며, 북동쪽 끝 안개 고인 골짜기에는 '유령곡'이 자리합니다. 통곡설봉과 빙봉수성은 그 길목을 지키듯 솟은 두 산맥입니다.`,
+      traits: [
+        "만년설 봉우리와 깊은 협곡이 이어진 고산 지대",
+        "북동쪽 끝 안개 골짜기 — 유령곡",
+        "길목의 두 산맥 — 통곡설봉 · 빙봉수성",
+        "혹한과 칼바람, 극히 드문 인적"
+      ],
+      seal: "北",
+      color: "#cbd5e1",
+      label: { x: 1250, y: 250, size: 46 },
+      polygon: "900,40 1900,50 2420,70 2430,390 2150,420 1850,430 1560,600 1480,620 1250,560 1000,560 930,420"
+    },
+    west: {
+      id: "west",
+      name: "서부",
+      hanja: "西部",
+      direction: "황량계 서방",
+      category: "먹빛 산지 / 황야",
+      ruler: "추라대 (현상금 사냥꾼 연합)",
+      dangerLevel: "★★★★☆",
+      summary: "추라대의 사냥꾼들이 활개 치는 짙은 산지와 메마른 황야.",
+      description: `먹구름처럼 짙은 산지와 메마른 황야가 뒤엉킨 황량계의 서쪽 땅입니다.
+현상금 사냥꾼 연합 추라대가 산중 성채를 거점으로 서부 일대를 장악하고 있으며, 황해로 내려가는 길목의 객잔 마을 풍사숙에는 사냥꾼과 상인들이 모여듭니다.`,
+      traits: [
+        "짙은 산지와 메마른 황야",
+        "추라대의 본거지 — 추라성채",
+        "황해로 내려가는 길목의 객잔 마을, 풍사숙",
+        "의뢰와 현상금이 오가는 무법의 땅"
+      ],
+      seal: "西",
+      color: "#f59e0b",
+      label: { x: 230, y: 330, size: 46 },
+      polygon: "40,60 900,40 930,420 1000,560 820,640 760,780 780,930 920,1060 700,1050 300,1000 60,1000 30,600"
+    },
+    east: {
+      id: "east",
+      name: "동부",
+      hanja: "東部",
+      direction: "황량계 동방",
+      category: "광활한 평야 / 상업 중심지",
+      ruler: "명조궁",
+      dangerLevel: "★★★☆☆",
+      summary: "황량계에서 가장 넓고 풍요로운 땅. 그 모든 부는 명조궁으로 흘러든다.",
+      description: `황량계에서 가장 넓고 비옥한 땅입니다. 황해 동쪽 평야를 따라 마을과 상권이 모여 있고, 그 중심에 명조궁이 군림합니다.
+대부분의 촌락이 명조궁의 '보호' 아래 세금을 바치며 살아가며, 동남쪽으로는 검은 산맥이 험준하게 이어집니다.`,
+      traits: [
+        "황량계 최대의 평야와 상권",
+        "명조궁의 본거지 — 명조태궁",
+        "명조궁의 영향 아래 놓인 촌락들 (낙원촌 등)",
+        "동남쪽으로 이어지는 험준한 산맥"
+      ],
+      seal: "東",
+      color: "#a78bfa",
+      label: { x: 2150, y: 690, size: 46 },
+      polygon: "2430,390 2430,1500 1900,1560 1550,1520 1300,1560 1280,1300 1380,1080 1520,960 1560,760 1560,600 1850,430 2150,420"
+    },
+    south: {
+      id: "south",
+      name: "남부",
+      hanja: "南部",
+      direction: "황량계 남방",
+      category: "험준한 산악 / 독무림",
+      ruler: "흑사당",
+      dangerLevel: "★★★★★",
+      summary: "깎아지른 봉우리와 짙은 안개 속, 흑사당이 숨어 있는 남쪽의 험지.",
+      description: `깎아지른 봉우리와 짙은 안개가 뒤덮은 황량계의 남쪽 산악 지대입니다.
+남서쪽 산중 깊은 곳에는 살수 집단 흑사당이 은신해 있으며, 그 본산인 흑사연혈은 천 길 낭떠러지 아래 숨어 있습니다. 흑사당의 뱀 문양 깃발이 보이면 남부 사람들은 숨을 죽입니다.`,
+      traits: [
+        "깎아지른 봉우리와 짙은 안개의 산악 지대",
+        "흑사당의 은신처와 본산 — 흑사연혈",
+        "명조궁과의 암투가 끊이지 않는 접경",
+        "길을 잃으면 살아 나오기 어려운 험지"
+      ],
+      seal: "南",
+      color: "#34d399",
+      label: { x: 870, y: 1470, size: 46 },
+      polygon: "60,1000 300,1000 700,1050 920,1060 1150,1110 1380,1080 1280,1300 1300,1560 1150,1660 1000,1640 700,1790 300,1460 60,1300"
+    }
+  },
+  sites: {
     yuryeonggok: {
       id: "yuryeonggok",
-      seal: "幽",            // 족자에 찍히는 낙관 글자
       name: "유령곡",
       hanja: "幽靈谷",
       direction: "북부",
@@ -68,14 +173,16 @@ const WORLD_DATA = {
         "황량계의 북쪽 경계면, 세상의 끝자락에 위치한 버려진 땅입니다.",
         "귀신이 곡하는 소리 같은 거센 산바람이 부는 험준한 산악 고지대이며, 사나운 야수가 서식합니다."
       ],
+      seal: "幽",
       color: "#cbd5e1",
-      label: { x: 670, y: 270, size: 24 },
-      focus: { x: 660, y: 280, scale: 1.45 },
-      polygon: "450,80 600,60 750,70 880,100 940,190 900,270 860,340 770,440 660,430 580,470 480,430 410,350 390,240 410,140"
+      region: "north",
+      x: 2310,
+      y: 230,
+      radius: 70,
+      pin: { shape: "mist", r: 12, fill: "#1f2937", stroke: "#cbd5e1", icon: "#e2e8f0" }
     },
     churadae: {
       id: "churadae",
-      seal: "追",            // 족자에 찍히는 낙관 글자
       name: "추라대",
       hanja: "追羅隊",
       direction: "서부",
@@ -96,14 +203,17 @@ const WORLD_DATA = {
         "서부 황야를 장악한 거대한 현상금 사냥꾼 연합 세력입니다.",
         "돈과 유명세를 위해서라면 수단과 방법을 가리지 않습니다."
       ],
+      seal: "追",
       color: "#f59e0b",
-      label: { x: 380, y: 610, size: 24 },
-      focus: { x: 380, y: 620, scale: 1.45 },
-      polygon: "400,430 480,430 580,470 640,510 620,680 540,680 480,740 380,840 240,850 170,780 190,640 160,560 210,460 300,450"
+      region: "west",
+      x: 380,
+      y: 560,
+      radius: 135,
+      keyPlace: { name: "추라성채", hanja: "追羅砦", desc: "사냥꾼들의 의뢰판과 막대한 현상금이 오가는 추라대의 핵심 녹색 거점." },
+      pin: { shape: "keep", r: 15, fill: "#78350f", stroke: "#fbbf24", icon: "#fbbf24" }
     },
     myeongjogung: {
       id: "myeongjogung",
-      seal: "冥",            // 족자에 찍히는 낙관 글자
       name: "명조궁",
       hanja: "冥朝宮",
       direction: "동부",
@@ -124,14 +234,17 @@ const WORLD_DATA = {
         "황량계의 혼란을 뒤에서 조장하고 막대한 돈과 권력을 흡수하는 거대 패권 집단입니다.",
         "대부호와 권력자들이 배후이며, 마을과 군락에 보호 명목으로 세금을 걷습니다. 남부 흑사당과 대립합니다."
       ],
+      seal: "冥",
       color: "#a78bfa",
-      label: { x: 1090, y: 610, size: 24 },
-      focus: { x: 1050, y: 680, scale: 1.35 },
-      polygon: "860,340 980,340 1040,410 1180,480 1330,560 1380,640 1320,760 1240,880 1180,1020 1060,1040 960,960 950,740 860,610 810,550 740,500 770,440"
+      region: "east",
+      x: 1760,
+      y: 830,
+      radius: 175,
+      keyPlace: { name: "명조태궁", hanja: "冥朝太宮", desc: "황량계 동부의 패권을 쥔 거대 도성. 막대한 부와 무역로가 교차하는 중심지." },
+      pin: { shape: "palace", r: 17, fill: "#4c1d95", stroke: "#c084fc", icon: "#fbcfe8" }
     },
     heuksadang: {
       id: "heuksadang",
-      seal: "蛇",            // 족자에 찍히는 낙관 글자
       name: "흑사당",
       hanja: "黑蛇堂",
       direction: "남부",
@@ -152,16 +265,17 @@ const WORLD_DATA = {
         "남부 독무림 깊은 곳에 은신한 잔혹무도한 살수(살인 청부) 집단입니다.",
         "명조궁의 확장을 경계하며 피비린내 나는 대립을 이어가고 있습니다."
       ],
+      seal: "蛇",
       color: "#34d399",
-      label: { x: 730, y: 990, size: 24 },
-      focus: { x: 720, y: 950, scale: 1.45 },
-      polygon: "540,680 620,680 700,730 780,740 840,780 900,800 950,740 960,960 920,1080 850,1240 760,1340 670,1220 630,1100 540,1040 460,1080 440,980 480,880 480,740"
+      region: "south",
+      x: 450,
+      y: 1170,
+      radius: 140,
+      pin: { shape: "serpent", r: 15, fill: "#064e3b", stroke: "#34d399", icon: "#6ee7b7" }
     },
     villages: {
       id: "villages",
-      seal: "村",            // 족자에 찍히는 낙관 글자
       name: "황량계 군락과 촌락",
-      loreTitle: "군락과 마을",
       hanja: "群落 · 村落",
       direction: "대륙 전역",
       category: "일반 서민 거주지",
@@ -180,107 +294,84 @@ const WORLD_DATA = {
       loreBullets: [
         "대륙 군데군데 작은 마을들이 분포해 있으며, 주로 동부 명조궁의 영향력을 크게 받습니다."
       ],
-      color: "#10b981"
-      // 지도상 경계(polygon)가 없는 구역 — 마을 마커를 통해서만 열람됩니다.
+      seal: "村",
+      color: "#10b981",
+      loreTitle: "군락과 마을",
+      region: null
     }
   },
-
-  // 거점 마커
-  //  pin.shape: peak(삼각) · keep(사각) · palace(마름모) · serpent(뱀) · village(점)
-  //  anchor: "monster" → 별도 핀 없이, 야간에 나타나는 괴수 실루엣을 클릭하면 열리는 거점
   landmarks: [
     {
       id: "lm_whirlpool",
       name: "황해 중심 소용돌이",
       hanja: "荒海 渦",
-      region: "hwanghae",
-      x: 760,
-      y: 670,
       type: "위험 수역",
       desc: "밤마다 고대 바다 괴수가 고개를 내민다는 황해의 가장 깊은 소용돌이.",
-      anchor: "monster"
+      anchor: "monster",
+      region: "hwanghae",
+      x: 1150,
+      y: 870
     },
     {
       id: "lm_ghost_peak",
       name: "통곡의 만년설봉",
       shortName: "통곡설봉",
       hanja: "慟哭雪峰",
-      region: "yuryeonggok",
-      x: 670,
-      y: 220,
       type: "극지 영봉",
       desc: "귀곡성이 가장 드높게 울리는 유령곡 북쪽의 설산. 살아서 넘은 자가 없다.",
-      pin: { shape: "peak", r: 13, fill: "#334155", stroke: "#e2e8f0", icon: "#e2e8f0" }
+      pin: { shape: "peak", r: 13, fill: "#334155", stroke: "#e2e8f0", icon: "#e2e8f0" },
+      region: "north",
+      x: 2040,
+      y: 255
     },
     {
       id: "lm_waterseal_keep",
       name: "빙봉수성",
       hanja: "氷封水城",
-      region: "yuryeonggok",
-      x: 508,
-      y: 420,
       type: "호수 요새",
       desc: "유령곡 남부 얼어붙은 호수 위에 세워진 은밀한 수중 성채.",
-      pin: { shape: "keep", r: 12, fill: "#1e293b", stroke: "#38bdf8", icon: "#38bdf8" }
-    },
-    {
-      id: "lm_bounty_keep",
-      name: "추라성채",
-      hanja: "追羅砦",
-      region: "churadae",
-      x: 429,
-      y: 545,
-      type: "사냥꾼 요새",
-      desc: "사냥꾼들의 의뢰판과 막대한 현상금이 오가는 추라대의 핵심 녹색 거점.",
-      pin: { shape: "keep", r: 13, fill: "#78350f", stroke: "#fbbf24", icon: "#fbbf24" }
-    },
-    {
-      id: "lm_palace",
-      name: "명조태궁",
-      hanja: "冥朝太宮",
-      region: "myeongjogung",
-      x: 1084,
-      y: 681,
-      type: "궁궐 / 거대 도성",
-      desc: "황량계 동부의 패권을 쥔 거대 도성. 막대한 부와 무역로가 교차하는 중심지.",
-      pin: { shape: "palace", r: 14, fill: "#4c1d95", stroke: "#c084fc", icon: "#fbcfe8" }
+      pin: { shape: "keep", r: 12, fill: "#1e293b", stroke: "#38bdf8", icon: "#38bdf8" },
+      region: "north",
+      x: 1700,
+      y: 345
     },
     {
       id: "lm_serpent_den",
       name: "흑사연혈",
       hanja: "黑蛇淵穴",
-      region: "heuksadang",
-      x: 723,
-      y: 908,
       type: "살수 총본산",
       desc: "천 길 낭떠러지와 독사들이 우글거리는 남부 산맥의 지하 암굴 요새.",
-      pin: { shape: "serpent", r: 13, fill: "#064e3b", stroke: "#34d399", icon: "#6ee7b7" }
-    },
-    {
-      id: "lm_village_east",
-      name: "낙원촌",
-      hanja: "樂園村",
-      region: "villages",
-      x: 1200,
-      y: 580,
-      type: "동부 해안 촌락",
-      desc: "명조궁 동쪽 강줄기를 끼고 곡물과 어업으로 살아가는 마을.",
-      pin: { shape: "village", r: 9, fill: "#065f46", stroke: "#10b981", icon: "#a7f3d0" }
+      region: "south",
+      parent: "heuksadang",
+      x: 350,
+      y: 1060,
+      pin: { shape: "cave", r: 10, fill: "#064e3b", stroke: "#34d399", icon: "#a7f3d0" }
     },
     {
       id: "lm_village_west",
       name: "풍사숙",
       hanja: "風砂宿",
-      region: "villages",
-      x: 300,
-      y: 660,
       type: "황야 객잔촌",
       desc: "추라대 사냥꾼들과 상인들이 모여 정보와 술을 나누는 서부 주막 마을.",
-      pin: { shape: "village", r: 9, fill: "#065f46", stroke: "#10b981", icon: "#a7f3d0" }
+      pin: { shape: "village", r: 9, fill: "#065f46", stroke: "#10b981", icon: "#a7f3d0" },
+      region: "west",
+      parent: "villages",
+      x: 620,
+      y: 900
+    },
+    {
+      id: "lm_village_east",
+      name: "낙원촌",
+      hanja: "樂園村",
+      type: "동부 해안 촌락",
+      desc: "명조궁 동쪽 강줄기를 끼고 곡물과 어업으로 살아가는 마을.",
+      pin: { shape: "village", r: 9, fill: "#065f46", stroke: "#10b981", icon: "#a7f3d0" },
+      region: "east",
+      parent: "villages",
+      x: 2150,
+      y: 1060
     }
   ],
-
-  // 주요 등장인물 (등장인물 모달)
   charactersIntro: "의 패권과 무법의 질서를 이끄는 각 세력의 주요 인물들입니다.",
   characters: [
     {

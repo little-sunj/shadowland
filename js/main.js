@@ -8,7 +8,7 @@
 function renderLoreModal(data) {
   const e = escapeHtml;
   const sections = data.loreOrder.map((id) => {
-    const r = data.regions[id];
+    const r = data.regions[id] || data.sites[id];   // 구역(황해)과 지점을 함께 나열
     if (!r) return '';
     const title = r.loreTitle || `${r.direction}: ${r.name} (${r.hanja})`;
     // loreBullets 는 <strong> 강조를 위해 데이터 작성자가 직접 쓴 HTML 을 허용합니다
@@ -111,7 +111,8 @@ document.addEventListener('DOMContentLoaded', () => {
   new IntroManager((viaKeyboard) => {
     mainScreen.inert = false;
     if (viaKeyboard) viewport.focus({ preventScroll: true });
-    setTimeout(() => fantasyMap.panTo(760, 650, 1.05), 400);
+    const { intro } = WORLD_DATA.map;
+    setTimeout(() => fantasyMap.panTo(intro.x, intro.y, fantasyMap.computeFitScale() * 1.25), 400);
   });
 
   // 3. 모달

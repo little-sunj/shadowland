@@ -37,8 +37,8 @@
   position: absolute;
   top: 0;
   left: 0;
-  width: 1400px;
-  height: 1400px;
+  width: 2464px;                  /* 실제 크기는 js 가 data.map 의 width/height 로 지정 */
+  height: 1856px;
   transform-origin: 0 0;
   /* transform 은 JS 가 매 프레임 직접 지정 — CSS transition 을 두면 입력이 밀립니다 */
   box-shadow: 0 25px 70px rgba(0, 0, 0, 0.85), 0 0 0 1px var(--border-subtle);
@@ -395,6 +395,10 @@
   color: var(--ink-body);
 }
 
+.panel-traits-list + .panel-traits-title {
+  margin-top: 18px;               /* 특성 목록 뒤의 바로가기 제목 */
+}
+
 .panel-traits-list li {
   position: relative;
   padding-left: 16px;
@@ -424,6 +428,33 @@
   color: var(--ink-muted);
 }
 
+/* 족자 속 바로가기 버튼 (지점 ↔ 구역 ↔ 거점) */
+.panel-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.panel-chip {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  color: var(--ink);
+  background: rgba(var(--accent-dark-rgb), 0.08);
+  border: 1px solid var(--ink-line);
+  border-radius: 999px;
+  padding: 4px 12px;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.panel-chip:hover,
+.panel-chip:focus-visible {
+  background: rgba(var(--vermilion-rgb), 0.08);
+  border-color: var(--vermilion);
+  color: var(--vermilion);
+}
+
 .panel-notice .icon {
   width: 18px;
   height: 18px;
@@ -442,7 +473,7 @@
 /* 구역 폴리곤: 평소엔 투명, 호버 시 아주 옅은 색만 비칩니다.
    호버 색을 완전히 없애려면 --region-hover-opacity 를 0 으로 바꾸세요. */
 :root {
-  --region-hover-opacity: 0.1;
+  --region-hover-opacity: 0.16;
 }
 
 .region-polygon {
@@ -451,8 +482,8 @@
   fill-opacity: 0;
   stroke: var(--region-color, #fff);
   stroke-opacity: 0;
-  stroke-width: 2.5;
-  stroke-dasharray: 8 6;
+  stroke-width: 5;
+  stroke-dasharray: 14 10;
   stroke-linejoin: round;
   pointer-events: all;
   outline: none;
@@ -462,6 +493,7 @@
 .region-polygon:hover,
 .region-polygon.is-selected {
   fill-opacity: var(--region-hover-opacity);
+  filter: url(#region-soft);      /* 경계가 먹물처럼 번지게 (호버·선택 시에만 계산) */
 }
 
 /* 키보드로 선택 중일 때는 경계선까지 보여 줍니다 */
@@ -470,12 +502,30 @@
   stroke-opacity: 0.9;
 }
 
+/* 지점 세력권 고리 — 핀에 마우스를 올리거나 지점을 선택하면 규모만큼 번져 보입니다 */
+.site-ring {
+  fill: var(--ring-color);
+  fill-opacity: 0;
+  stroke: var(--ring-color);
+  stroke-opacity: 0;
+  stroke-width: 4;
+  stroke-dasharray: 12 9;
+  pointer-events: none;
+  transition: fill-opacity 0.3s ease, stroke-opacity 0.3s ease;
+}
+
+.site-ring.is-hover,
+.site-ring.is-selected {
+  fill-opacity: 0.12;
+  stroke-opacity: 0.75;
+}
+
 /* 지도 위 글자: 먹 글씨 + 한지색 외곽선(paint-order) — SVG 필터보다 훨씬 가볍습니다 */
 .map-text {
   font-family: var(--font-serif);
   paint-order: stroke fill;
   stroke: rgba(var(--hanji-rgb), 0.85);
-  stroke-width: 3.5px;
+  stroke-width: 6px;
   stroke-linejoin: round;
   transition: fill 0.8s ease, stroke 0.8s ease;
 }
@@ -484,21 +534,26 @@
   pointer-events: none;
 }
 
+.map-marker .map-text,
+#monster-group .map-text {
+  stroke-width: 3.5px;             /* 마커·괴수는 확대된 그룹 안이라 외곽선을 얇게 */
+}
+
 .region-label {
   font-weight: 900;
-  letter-spacing: 4px;
+  letter-spacing: 8px;
   fill: var(--ink);
 }
 
 .region-sublabel {
-  font-size: 12px;
+  font-size: 22px;
   font-weight: 700;
-  letter-spacing: 6px;
+  letter-spacing: 10px;
   fill: var(--ink-soft);
 }
 
 .route-label {
-  font-size: 11px;
+  font-size: 19px;
   font-weight: 700;
   fill: var(--vermilion-dark);
 }
@@ -568,6 +623,11 @@
 
 .marker-label.is-small {
   font-size: 11px;
+}
+
+.marker-label.is-major {
+  font-size: 15px;
+  font-weight: 900;
 }
 
 .map-marker:hover .marker-label,
@@ -646,14 +706,6 @@
   fill: var(--night-sublabel);
 }
 
-/* 밤에는 괴수 실루엣이 황해 부제(荒海) 자리를 덮으므로 숨김 */
-.region-sublabel[data-region="hwanghae"] {
-  transition: opacity 0.8s ease;
-}
-
-#main-screen.night-mode .region-sublabel[data-region="hwanghae"] {
-  opacity: 0;
-}
 
 #main-screen.night-mode .map-marker:hover .marker-label,
 #main-screen.night-mode .map-marker.is-selected .marker-label {
