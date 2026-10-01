@@ -145,7 +145,7 @@ class FantasyMap {
 
     // 주요 지점 (세력권 고리 + 큰 핀)
     Object.values(this.data.sites).forEach((site) => {
-      if (!site.pin) return;                      // 핀이 없는 그룹(마을 등)
+      if (site.x === undefined) return;           // 지도 위치가 없는 그룹(마을 등)
       const ring = svgEl('circle', {
         class: 'site-ring', cx: site.x, cy: site.y, r: site.radius,
         'data-site': site.id, style: `--ring-color: ${site.color}`
@@ -178,7 +178,7 @@ class FantasyMap {
         }
         return;
       }
-      if (lm.pin) {
+      if (lm.x !== undefined) {
         markersLayer.appendChild(this.createMarker(lm, {
           major: false,
           tooltip: `◈ ${lm.name} (${lm.hanja}) - ${lm.type}`,
@@ -206,11 +206,11 @@ class FantasyMap {
     });
   }
 
-  // item: sites[] 또는 landmarks[] 항목. 핀 내부는 작은 좌표로 그리고 map.markerScale 배로 키웁니다.
+  // item: sites[] 또는 landmarks[] 항목. 모든 지점·거점은 같은 위치핀(#i-location)을 쓰고,
+  // 지점(major)은 조금 크게 그립니다. 핀의 뾰족한 끝이 (x, y) 위치를 가리킵니다.
   createMarker(item, { major, tooltip, activate }) {
-    const { shape, r, fill, stroke, icon } = item.pin;
-    const isSmall = shape === 'village';
     const k = this.data.map.markerScale || 1;
+    const size = major ? 30 : 24;                  // 핀 크기 (마커 좌표계, 실제로는 k 배)
 
     const g = svgEl('g', {
       class: `map-marker${major ? ' is-major' : ''}`,
@@ -221,34 +221,21 @@ class FantasyMap {
       'aria-label': `${item.name}(${item.hanja}) — 족자 열기`
     });
 
-    g.appendChild(svgEl('circle', { class: 'marker-hitbox', r: r + 12 }));
+    // 클릭 영역: 핀 몸통을 넉넉히 덮는 원
+    g.appendChild(svgEl('circle', { class: 'marker-hitbox', cy: -size * 0.55, r: size * 0.75 }));
 
     const pin = svgEl('g', { class: 'marker-pin' });
-    pin.appendChild(svgEl('circle', {
-      r, fill, stroke, 'stroke-width': isSmall ? 1.8 : 2,
-      filter: isSmall ? null : 'url(#marker-glow)'
+    // 핀 속을 한지색으로 채워 어떤 지형 위에서도 또렷하게
+    pin.appendChild(svgEl('circle', { class: 'marker-fill', cy: -size * 0.585, r: size * 0.3 }));
+    pin.appendChild(svgEl('use', {
+      class: 'marker-icon', href: '#i-location',
+      x: -size / 2, y: -size, width: size, height: size
     }));
-
-    const s = r / 13;   // 아이콘은 반지름 13 기준으로 그려 두고 핀 크기에 맞춰 확대
-    const icons = {
-      peak: () => svgEl('polygon', { points: '0,-7 -6,4 6,4', fill: icon }),
-      keep: () => svgEl('rect', { x: -5, y: -5, width: 10, height: 10, fill: icon }),
-      palace: () => svgEl('polygon', { points: '0,-7 7,0 0,7 -7,0', fill: icon }),
-      serpent: () => svgEl('path', { d: 'M -4,-4 Q 4,-1 -4,2 Q 4,5 0,6', stroke: icon, 'stroke-width': 2, fill: 'none' }),
-      mist: () => svgEl('path', { d: 'M -6,-3 q 3,-3 6,0 t 6,0 M -6,3 q 3,-3 6,0 t 6,0', stroke: icon, 'stroke-width': 1.8, fill: 'none', 'stroke-linecap': 'round' }),
-      cave: () => svgEl('path', { d: 'M -6,5 L -6,0 A 6,6 0 0 1 6,0 L 6,5 Z', fill: icon }),
-      village: () => svgEl('circle', { r: 3.5, fill: icon })
-    };
-    if (icons[shape]) {
-      const glyph = icons[shape]();
-      if (!isSmall && s !== 1) glyph.setAttribute('transform', `scale(${s.toFixed(3)})`);
-      pin.appendChild(glyph);
-    }
     g.appendChild(pin);
 
     const label = svgEl('text', {
-      y: r + (major ? 14 : 11),
-      class: `map-text marker-label${major ? ' is-major' : ''}${isSmall ? ' is-small' : ''}`,
+      y: major ? 15 : 13,
+      class: `map-text marker-label${major ? ' is-major' : ''}`,
       'text-anchor': 'middle'
     });
     label.textContent = item.shortName || item.name;
@@ -390,7 +377,15 @@ class FantasyMap {
     const scale = this.computeFitScale();
     const { vw, vh } = this.viewportSize();
     const tx = (vw - this.mapWidth * scale) / 2;
-    const ty = (vh - this.mapHeight * scale) / 2;
+    let ty = (vh - this.mapHeight * scale) / 2;
+    // 위아래가 잘릴 때는, 가장 위쪽 지점·거점이 상단 버튼(HUD)에 가리지 않을 만큼 지도를 내려서 시작
+    const ys = [...Object.values(this.data.sites), ...this.data.landmarks].map((p) => p.y).filter((y) => y !== undefined);
+    const hud = document.querySelector('.top-hud');
+    if (ys.length && hud) {
+      const hudBottom = hud.getBoundingClientRect().bottom - this.viewport.getBoundingClientRect().top;
+      const markerTop = (Math.min(...ys) - 60) * scale;     // 핀 높이만큼 여유
+      ty = Math.min(0, Math.max(ty, hudBottom + 12 - markerTop, vh - this.mapHeight * scale));
+    }
 
     if (animate) {
       this.animateTo(tx, ty, scale);
@@ -735,7 +730,7 @@ class FantasyMap {
   relatedLinks(kind, data) {
     const links = [];
     if (kind === 'region') {
-      Object.values(this.data.sites).filter((s) => s.region === data.id && s.pin)
+      Object.values(this.data.sites).filter((s) => s.region === data.id && s.x !== undefined)
         .forEach((s) => links.push({ key: `site:${s.id}`, label: s.name }));
       this.data.landmarks.filter((l) => l.region === data.id && !(l.parent && this.data.sites[l.parent]?.region === data.id))
         .forEach((l) => links.push({ key: `landmark:${l.id}`, label: l.shortName || l.name }));

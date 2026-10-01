@@ -7,7 +7,7 @@
 //              (선택 시 카메라는 경계에 맞춰 자동 계산. 직접 정하려면 focus: { x, y, scale } 추가)
 //  sites     : 각 구역의 주요 지점 (유령곡·추라대·명조궁·흑사당) — radius 가 세력권(규모)
 //  landmarks : 소거점 — parent 가 있으면 그 지점의 족자에, 없으면 소속 구역 족자에 표시
-//  pin.shape : peak(삼각) · keep(사각) · palace(마름모) · serpent(뱀) · mist(안개) · cave(동굴) · village(점)
+//  x, y      : 지도 위 위치핀 자리 (모든 지점·거점은 같은 위치핀을 쓰고, 지점은 조금 크게 표시됩니다)
 //  seal      : 족자에 찍히는 낙관 글자
 // ==========================================================================
 const WORLD_DATA = {
@@ -146,7 +146,7 @@ const WORLD_DATA = {
       ],
       seal: "南",
       color: "#34d399",
-      label: { x: 870, y: 1470, size: 46 },
+      label: { x: 870, y: 1380, size: 46 },
       polygon: "60,1000 300,1000 700,1050 920,1060 1150,1110 1380,1080 1280,1300 1300,1560 1150,1660 1000,1640 700,1790 300,1460 60,1300"
     }
   },
@@ -178,8 +178,7 @@ const WORLD_DATA = {
       region: "north",
       x: 2310,
       y: 230,
-      radius: 70,
-      pin: { shape: "mist", r: 12, fill: "#1f2937", stroke: "#cbd5e1", icon: "#e2e8f0" }
+      radius: 70
     },
     churadae: {
       id: "churadae",
@@ -209,8 +208,7 @@ const WORLD_DATA = {
       x: 380,
       y: 560,
       radius: 135,
-      keyPlace: { name: "추라성채", hanja: "追羅砦", desc: "사냥꾼들의 의뢰판과 막대한 현상금이 오가는 추라대의 핵심 녹색 거점." },
-      pin: { shape: "keep", r: 15, fill: "#78350f", stroke: "#fbbf24", icon: "#fbbf24" }
+      keyPlace: { name: "추라성채", hanja: "追羅砦", desc: "사냥꾼들의 의뢰판과 막대한 현상금이 오가는 추라대의 핵심 녹색 거점." }
     },
     myeongjogung: {
       id: "myeongjogung",
@@ -240,8 +238,7 @@ const WORLD_DATA = {
       x: 1760,
       y: 830,
       radius: 175,
-      keyPlace: { name: "명조태궁", hanja: "冥朝太宮", desc: "황량계 동부의 패권을 쥔 거대 도성. 막대한 부와 무역로가 교차하는 중심지." },
-      pin: { shape: "palace", r: 17, fill: "#4c1d95", stroke: "#c084fc", icon: "#fbcfe8" }
+      keyPlace: { name: "명조태궁", hanja: "冥朝太宮", desc: "황량계 동부의 패권을 쥔 거대 도성. 막대한 부와 무역로가 교차하는 중심지." }
     },
     heuksadang: {
       id: "heuksadang",
@@ -270,8 +267,7 @@ const WORLD_DATA = {
       region: "south",
       x: 450,
       y: 1170,
-      radius: 140,
-      pin: { shape: "serpent", r: 15, fill: "#064e3b", stroke: "#34d399", icon: "#6ee7b7" }
+      radius: 140
     },
     villages: {
       id: "villages",
@@ -319,7 +315,6 @@ const WORLD_DATA = {
       hanja: "慟哭雪峰",
       type: "극지 영봉",
       desc: "귀곡성이 가장 드높게 울리는 유령곡 북쪽의 설산. 살아서 넘은 자가 없다.",
-      pin: { shape: "peak", r: 13, fill: "#334155", stroke: "#e2e8f0", icon: "#e2e8f0" },
       region: "north",
       x: 2040,
       y: 255
@@ -330,7 +325,6 @@ const WORLD_DATA = {
       hanja: "氷封水城",
       type: "호수 요새",
       desc: "유령곡 남부 얼어붙은 호수 위에 세워진 은밀한 수중 성채.",
-      pin: { shape: "keep", r: 12, fill: "#1e293b", stroke: "#38bdf8", icon: "#38bdf8" },
       region: "north",
       x: 1700,
       y: 345
@@ -344,8 +338,7 @@ const WORLD_DATA = {
       region: "south",
       parent: "heuksadang",
       x: 350,
-      y: 1060,
-      pin: { shape: "cave", r: 10, fill: "#064e3b", stroke: "#34d399", icon: "#a7f3d0" }
+      y: 1060
     },
     {
       id: "lm_village_west",
@@ -353,7 +346,6 @@ const WORLD_DATA = {
       hanja: "風砂宿",
       type: "황야 객잔촌",
       desc: "추라대 사냥꾼들과 상인들이 모여 정보와 술을 나누는 서부 주막 마을.",
-      pin: { shape: "village", r: 9, fill: "#065f46", stroke: "#10b981", icon: "#a7f3d0" },
       region: "west",
       parent: "villages",
       x: 620,
@@ -365,7 +357,6 @@ const WORLD_DATA = {
       hanja: "樂園村",
       type: "동부 해안 촌락",
       desc: "명조궁 동쪽 강줄기를 끼고 곡물과 어업으로 살아가는 마을.",
-      pin: { shape: "village", r: 9, fill: "#065f46", stroke: "#10b981", icon: "#a7f3d0" },
       region: "east",
       parent: "villages",
       x: 2150,

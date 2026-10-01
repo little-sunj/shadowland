@@ -618,7 +618,24 @@
 
 .map-marker .marker-pin {
   transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.25s ease;
-  transform-origin: 0 0;          /* 부모 <g>가 translate 되어 있어 (0,0)이 핀의 중심입니다 */
+  transform-origin: 0 0;          /* (0,0) = 핀의 뾰족한 끝. 커질 때도 끝이 제자리를 가리킵니다 */
+}
+
+/* 위치핀 — 주홍 핀 + 한지색 외곽선 (색은 style.css 변수) */
+.marker-icon {
+  fill: var(--vermilion);
+  stroke: rgba(var(--hanji-rgb), 0.95);
+  stroke-width: 70px;              /* 아이콘 좌표계(960) 기준 ≈ 화면 약 2px */
+  stroke-linejoin: round;
+  paint-order: stroke fill;
+}
+
+.marker-fill {
+  fill: rgba(var(--hanji-rgb), 0.92);
+}
+
+.map-marker.is-major .marker-icon {
+  fill: var(--vermilion-dark);
 }
 
 .map-marker:hover .marker-pin,
@@ -635,10 +652,6 @@
   pointer-events: none;
   letter-spacing: 1px;
   transition: fill 0.2s ease;
-}
-
-.marker-label.is-small {
-  font-size: 11px;
 }
 
 .marker-label.is-major {
