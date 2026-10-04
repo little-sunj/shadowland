@@ -5,95 +5,107 @@
 // ------------------------------------------------------------------
 // 모달 본문 생성 (js/data.js → 세계관 / 등장인물)
 // ------------------------------------------------------------------
+// 도감 항목 머리 — 낙관 + 소속(세력 색 점) + 이름
+function codexHead({ seal, eyebrow, title, hanja }) {
+  const e = escapeHtml;
+  return `
+    <div class="codex-head">
+      <span class="seal-stamp" aria-hidden="true">${e(seal)}</span>
+      <div>
+        <span class="codex-eyebrow">${e(eyebrow)}</span>
+        <h3 class="codex-title">${e(title)}${hanja ? `<small lang="zh-Hant">${e(hanja)}</small>` : ''}</h3>
+      </div>
+    </div>`;
+}
+
 function renderLoreModal(data) {
   const e = escapeHtml;
-  const sections = data.loreOrder.map((id) => {
+  const cards = data.loreOrder.map((id) => {
     const r = data.regions[id] || data.sites[id];   // 구역(황해)과 지점을 함께 나열
     if (!r) return '';
-    const title = r.loreTitle || `${r.direction}: ${r.name} (${r.hanja})`;
     // loreBullets 는 <strong> 강조를 위해 데이터 작성자가 직접 쓴 HTML 을 허용합니다
     return `
-      <h3>◈ ${e(title)}</h3>
-      <ul>${r.loreBullets.map((b) => `<li>${b}</li>`).join('')}</ul>`;
+      <li class="codex-card" style="--faction-color: ${e(r.color)}">
+        ${codexHead({ seal: r.seal, eyebrow: r.direction, title: r.loreTitle || r.name, hanja: r.loreTitle ? '' : r.hanja })}
+        <ul>${r.loreBullets.map((b) => `<li>${b}</li>`).join('')}</ul>
+      </li>`;
   }).join('');
 
   return `
-    <p><strong>${e(data.worldName)}(${e(data.worldHanja)})</strong>는 ${e(data.worldDescription)}</p>
-    ${sections}`;
+    <p class="modal-lead"><strong>${e(data.worldName)}</strong>(${e(data.worldHanja)})는 ${e(data.worldDescription)}</p>
+    <ul class="codex">${cards}</ul>`;
 }
 
 function renderCharactersModal(data) {
   const e = escapeHtml;
-  const people = data.characters.map((c) => `
-    <h3>◈ ${e(c.heading)}</h3>
-    <ul>
-      <li><strong>지위:</strong> ${e(c.position)}</li>
-      <li><strong>특징:</strong> ${e(c.traits)}</li>
-    </ul>`).join('');
+  const cards = data.characters.map((c) => {
+    const f = data.sites[c.faction] || {};
+    return `
+      <li class="codex-card" style="--faction-color: ${e(f.color || '')}">
+        ${codexHead({ seal: f.seal || '人', eyebrow: `${f.direction || ''} ${f.name || ''}`.trim(), title: c.title })}
+        <dl>
+          <dt>지위</dt><dd>${e(c.position)}</dd>
+          <dt>특징</dt><dd>${e(c.traits)}</dd>
+        </dl>
+      </li>`;
+  }).join('');
 
   return `
-    <p><strong>${e(data.worldName)}(${e(data.worldHanja)})</strong>${e(data.charactersIntro)}</p>
-    ${people}`;
+    <p class="modal-lead">${e(data.charactersIntro)}</p>
+    <ul class="codex">${cards}</ul>`;
 }
 
 // ------------------------------------------------------------------
-// 접근 가능한 모달: 열 때 포커스 이동, Tab 가두기, Esc 로 닫기, 닫으면 원래 버튼으로 복귀
+// 비록(秘錄) 창 — 네이티브 <dialog> + 탭.
+// Esc·포커스 가두기·배경 차단·포커스 복귀는 브라우저가 처리하고,
+// 여기서는 탭 전환, 닫기 버튼, 바깥(배경) 클릭만 연결합니다.
 // ------------------------------------------------------------------
-class Modal {
-  constructor(el, openButton) {
-    this.el = el;
-    this.openButton = openButton;
-    this.lastFocus = null;
-    this.closeTimer = null;
+class Codex {
+  constructor(dialog) {
+    this.dialog = dialog;
+    this.tabs = [...dialog.querySelectorAll('[role="tab"]')];
 
-    openButton.addEventListener('click', () => this.open());
-    el.querySelectorAll('[data-close-modal]').forEach((btn) => btn.addEventListener('click', () => this.close()));
-    el.addEventListener('click', (ev) => {
-      if (ev.target === el) this.close();          // 바깥(어두운 배경) 클릭
+    this.tabs.forEach((tab, i) => {
+      tab.addEventListener('click', () => this.select(i));
+      // 좌우 방향키로 탭 이동 (WAI-ARIA 탭 패턴)
+      tab.addEventListener('keydown', (e) => {
+        const step = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
+        if (!step) return;
+        e.preventDefault();
+        const next = (i + step + this.tabs.length) % this.tabs.length;
+        this.select(next);
+        this.tabs[next].focus();
+      });
     });
-    el.addEventListener('keydown', (ev) => this.trapFocus(ev));
+
+    dialog.querySelectorAll('[data-close-modal]').forEach((btn) => btn.addEventListener('click', () => dialog.close()));
+
+    // 배경(::backdrop)을 누르면 클릭 대상은 dialog 자신이고 좌표는 창 바깥입니다
+    dialog.addEventListener('click', (ev) => {
+      if (ev.target !== dialog) return;
+      const r = dialog.getBoundingClientRect();
+      const inside = ev.clientX >= r.left && ev.clientX <= r.right && ev.clientY >= r.top && ev.clientY <= r.bottom;
+      if (!inside) dialog.close();
+    });
   }
 
-  isOpen() {
-    return !this.el.hidden;
+  select(index) {
+    this.tabs.forEach((tab, i) => {
+      const on = i === index;
+      tab.setAttribute('aria-selected', String(on));
+      tab.tabIndex = on ? 0 : -1;
+      const panel = document.getElementById(tab.getAttribute('aria-controls'));
+      panel.hidden = !on;
+      if (on) panel.scrollTop = 0;
+    });
+    this.dialog.style.setProperty('--tab-index', index);
   }
 
-  open() {
-    clearTimeout(this.closeTimer);
-    this.lastFocus = document.activeElement;
-    this.el.hidden = false;
-    void this.el.offsetWidth;                      // 페이드 인 트랜지션 시작용 리플로우
-    this.el.classList.add('visible');
-    const closeBtn = this.el.querySelector('[data-close-modal]');
-    if (closeBtn) closeBtn.focus({ preventScroll: true });
-    this.el.querySelector('.modal-body').scrollTop = 0;
-  }
-
-  close() {
-    if (!this.isOpen()) return;
-    this.el.classList.remove('visible');
-    this.closeTimer = setTimeout(() => { this.el.hidden = true; }, 300);
-    if (this.lastFocus && document.contains(this.lastFocus)) {
-      this.lastFocus.focus({ preventScroll: true });
-    }
-  }
-
-  trapFocus(ev) {
-    if (ev.key !== 'Tab') return;
-    const focusables = [...this.el.querySelectorAll('button, [href], [tabindex]:not([tabindex="-1"])')]
-      .filter((n) => !n.disabled);
-    // 스크롤되는 본문도 키보드로 내릴 수 있도록 포함
-    const body = this.el.querySelector('.modal-body');
-    if (body && !focusables.includes(body)) focusables.push(body);
-    const first = focusables[0];
-    const last = focusables[focusables.length - 1];
-    if (ev.shiftKey && document.activeElement === first) {
-      ev.preventDefault();
-      last.focus();
-    } else if (!ev.shiftKey && document.activeElement === last) {
-      ev.preventDefault();
-      first.focus();
-    }
+  open(tabId) {
+    const index = Math.max(0, this.tabs.findIndex((t) => t.id === `tab-${tabId}`));
+    this.select(index);
+    if (!this.dialog.open) this.dialog.showModal();
+    this.tabs[index].focus({ preventScroll: true });
   }
 }
 
@@ -104,37 +116,32 @@ document.addEventListener('DOMContentLoaded', () => {
   const mainScreen = document.getElementById('main-screen');
   const viewport = document.getElementById('map-viewport');
 
-  // 1. 지도
+  // 1. 지도 — 인트로 동안에는 살짝 당겨 둔 상태로 대기
   const fantasyMap = new FantasyMap(WORLD_DATA);
+  const { intro } = WORLD_DATA.map;
+  fantasyMap.prepareReveal(intro.x, intro.y);
 
-  // 2. 인트로 — 안개가 걷히면 지도를 활성화하고 살짝 줌인
+  // 2. 배경음악 + 인트로 — 안개를 걷는 클릭(사용자 조작)에서 음악을 켜야 브라우저가 막지 않습니다
+  const bgm = new BgmPlayer(WORLD_DATA.bgm);
   new IntroManager((viaKeyboard) => {
+    bgm.start();
     mainScreen.inert = false;
     if (viaKeyboard) viewport.focus({ preventScroll: true });
-    const { intro } = WORLD_DATA.map;
-    setTimeout(() => fantasyMap.panTo(intro.x, intro.y, fantasyMap.computeFitScale() * 1.25), 400);
+    fantasyMap.reveal();
   });
 
-  // 3. 모달
-  const loreBody = document.getElementById('lore-modal-body');
-  const charBody = document.getElementById('characters-modal-body');
-  loreBody.innerHTML = renderLoreModal(WORLD_DATA);
-  charBody.innerHTML = renderCharactersModal(WORLD_DATA);
-  loreBody.tabIndex = 0;
-  charBody.tabIndex = 0;
+  // 3. 비록 창 (세계관 / 등장인물 탭)
+  document.getElementById('codex-lore').innerHTML = renderLoreModal(WORLD_DATA);
+  document.getElementById('codex-people').innerHTML = renderCharactersModal(WORLD_DATA);
+  const codex = new Codex(document.getElementById('codex'));
+  document.querySelectorAll('[data-open-codex]').forEach((btn) => {
+    btn.addEventListener('click', () => codex.open(btn.dataset.openCodex));
+  });
 
-  const modals = [
-    new Modal(document.getElementById('lore-modal'), document.getElementById('btn-lore-modal')),
-    new Modal(document.getElementById('characters-modal'), document.getElementById('btn-characters-modal'))
-  ];
-
-  // 4. Esc: 열린 모달 → 족자 패널 순으로 닫기
+  // 4. Esc: 창이 열려 있으면 브라우저가 창만 닫고, 아니면 족자 패널을 닫습니다
   document.addEventListener('keydown', (e) => {
-    if (e.key !== 'Escape') return;
-    const openModal = modals.find((m) => m.isOpen());
-    if (openModal) {
-      openModal.close();
-    } else if (fantasyMap.isPanelOpen()) {
+    if (e.key !== 'Escape' || document.querySelector('dialog[open]')) return;
+    if (fantasyMap.isPanelOpen()) {
       fantasyMap.closeInfoPanel();
       viewport.focus({ preventScroll: true });
     }

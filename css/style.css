@@ -10,69 +10,78 @@
      ※ 한 색을 바꿀 때는 hex 와 *-rgb 를 함께 바꿔 주세요.
      ================================================================== */
 
-  /* 먹 (배경) */
-  --bg-deep: #0e0c0a;          --bg-rgb: 14, 12, 10;
-  --bg-map: #14110e;                                   /* 지도 바깥 여백 */
-  --ink-panel-rgb: 20, 17, 14;                         /* 툴팁·안내 알약 등 어두운 반투명 판 */
-  --backdrop-rgb: 10, 8, 6;                            /* 모달 뒤 어둡게 가리는 막 */
+  /* 먹 (배경) — 푸른 기가 도는 깊은 먹빛 */
+  --bg-deep: #0c0b0d;          --bg-rgb: 12, 11, 13;
+  --bg-map: #101114;                                   /* 지도 바깥 여백 */
+  --ink-panel-rgb: 14, 15, 18;                         /* 툴팁·안내 알약·GNB 등 어두운 반투명 판 */
+  --backdrop-rgb: 6, 7, 9;                             /* 모달 뒤 어둡게 가리는 막 */
 
   /* 텍스트 (어두운 바탕 위) */
-  --text-main: #efe6d6;
-  --text-body: #d8cdb8;
-  --text-dim: #a89c86;
-  --text-button: #e9dfcc;
+  --text-main: #ece6dc;
+  --text-body: #cfc8bd;
+  --text-dim: #8d8780;
+  --text-button: #e2dcd2;
 
-  /* 한지 (족자·모달 바탕) */
-  --hanji: #f3ead6;            --hanji-rgb: 243, 234, 214;
-  --hanji-deep: #e9dcc0;
-  --hanji-edge: #c8b690;
+  /* 판 (족자·모달 바탕) — 예전 '한지' 자리. 이름은 그대로 두고 먹빛 판으로 바꿨습니다 */
+  --hanji: #131317;            --hanji-rgb: 19, 19, 23;
+  --hanji-deep: #0c0b0d;
+  --hanji-edge: #24262c;
 
-  /* 먹 글씨 (한지 위) — 진한 순 */
-  --ink-strong: #1f1812;
-  --ink: #231a12;
-  --ink-body: #3a2f24;
-  --ink-muted: #4a3c2e;
-  --ink-soft: #6b4f33;
-  --ink-label: #7a5a2c;                                /* 족자 속 항목 이름 */
-  --ink-line: #b89a63;                                 /* 족자 속 테두리 */
+  /* 판 위 글씨 — 밝은 순 */
+  --ink-strong: #f4eee5;
+  --ink: #ece6dc;
+  --ink-body: #bcb4a9;
+  --ink-muted: #9d958a;
+  --ink-soft: #8a847c;
+  --ink-label: #7f8a96;                                /* 족자 속 항목 이름 */
+  --ink-line: #33363d;                                 /* 족자 속 테두리 */
 
-  /* 나무 축 */
-  --wood-light: #6b4526;
-  --wood-mid: #3b2615;
-  --wood-dark: #2a1a0e;
+  /* 족자 축 — 차가운 쇳빛 */
+  --wood-light: #3a4048;
+  --wood-mid: #23272d;
+  --wood-dark: #15171b;
 
-  /* 주홍 (낙관·강조) */
-  --vermilion: #b3261e;        --vermilion-rgb: 179, 38, 30;
-  --vermilion-dark: #8f1d16;
-  --vermilion-ink: #a33a2c;
-  --seal-border: #d9463b;
-  --seal-text: #f7ecdc;
+  /* 강조 (예전 주홍 자리) — 서늘한 청회색. 변수 이름은 호환을 위해 유지 */
+  --vermilion: #8fa9c4;        --vermilion-rgb: 143, 169, 196;
+  --vermilion-dark: #6f8aa6;
+  --vermilion-ink: #a9bfd6;
+  --seal-border: #8fa9c4;
+  --seal-text: #dde7f1;
 
-  /* 놋쇠 (강조색) */
-  --accent: #c9a45c;           --accent-rgb: 201, 164, 92;
-  --accent-light: #e0c283;
-  --accent-pale: #f1e2bd;
-  --accent-dark: #8a6d33;      --accent-dark-rgb: 138, 109, 51;
+  /* 보조 강조 (예전 놋쇠 자리) — 같은 청회색 계열 */
+  --accent: #8fa9c4;           --accent-rgb: 143, 169, 196;
+  --accent-light: #b9cbdd;
+  --accent-pale: #dde7f1;
+  --accent-dark: #7d95ae;      --accent-dark-rgb: 125, 149, 174;
   --accent-tint: rgba(var(--accent-rgb), 0.1);
-  --accent-border: rgba(var(--accent-rgb), 0.4);
+  --accent-border: rgba(var(--accent-rgb), 0.35);
   --accent-glow: rgba(var(--accent-rgb), 0.3);
 
   /* 버튼 (먹빛 그라디언트) */
-  --btn-top-rgb: 28, 24, 20;
-  --btn-bottom-rgb: 16, 13, 11;
+  --btn-top-rgb: 24, 26, 30;
+  --btn-bottom-rgb: 14, 15, 18;
 
   /* 지도 위 거점 강조 광채 */
-  --marker-glow: #f59e0b;      --marker-glow-rgb: 245, 158, 11;
+  --marker-glow: #9fc0e0;      --marker-glow-rgb: 159, 192, 224;
+
+  /* 지도 위 그래픽 전용 — 지도 그림(누런 수묵) 위에 얹히므로 사이트 테마와 따로 둡니다 */
+  --map-ink: #231a12;
+  --map-ink-soft: #6b4f33;
+  --map-paper-rgb: 243, 234, 214;                      /* 지명 글씨 외곽선 */
+  --map-pin: #2b3a4c;                                  /* 위치핀 — 짙은 쪽빛 */
+  --map-pin-major: #1b2633;
+  --map-route: #3f5a76;                                /* 주간 뱃길 */
+  --map-accent: #3f5a76;                               /* 선택된 핀 이름 */
 
   /* 인트로 (안개) — js/intro.js 의 안개 입자도 이 값을 읽어 갑니다 */
-  --intro-bg: #080706;
-  --intro-title: #f3eee3;
-  --curtain-rgb: 24, 21, 18;
-  --curtain-edge: #090806;
-  --fog-light-rgb: 52, 46, 38;
-  --fog-mid-rgb: 30, 26, 22;
-  --fog-particle-core-rgb: 40, 36, 32;
-  --fog-particle-mid-rgb: 22, 19, 16;
+  --intro-bg: #07080a;
+  --intro-title: #eef1f4;
+  --curtain-rgb: 18, 20, 24;
+  --curtain-edge: #07080a;
+  --fog-light-rgb: 44, 50, 58;
+  --fog-mid-rgb: 24, 27, 32;
+  --fog-particle-core-rgb: 36, 40, 46;
+  --fog-particle-mid-rgb: 18, 20, 24;
 
   --border-subtle: rgba(255, 255, 255, 0.08);
 
@@ -80,15 +89,17 @@
   --font-serif: 'Noto Serif KR', serif;
   --font-sans: 'Noto Sans KR', sans-serif;
 
-  /* 모바일 주소창을 고려한 화면 높이 (미지원 브라우저는 100vh) */
-  --vh-full: 100vh;
+  /* 판 표면 — 위쪽에 달빛처럼 옅은 푸른 기 */
+  --hanji-surface: radial-gradient(120% 50% at 50% 0%, rgba(var(--accent-rgb), 0.07) 0%, transparent 70%), linear-gradient(180deg, var(--hanji) 0%, var(--hanji-deep) 100%);
+  --rule: rgba(236, 230, 220, 0.12);                   /* 판 위 가는 괘선 */
+
+  /* 움직임 */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-@supports (height: 100dvh) {
-  :root { --vh-full: 100dvh; }
-}
-
-* {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -102,6 +113,10 @@ html, body {
   color: var(--text-main);
   font-family: var(--font-serif);
   line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  word-break: keep-all;             /* 한국어 문장이 단어 중간에서 끊기지 않도록 */
+  overflow-wrap: anywhere;
 }
 
 /* 드래그·연타가 잦은 조작 영역만 텍스트 선택을 막습니다 (세계관/족자 글은 복사 가능) */
@@ -112,6 +127,11 @@ html, body {
 button {
   -webkit-user-select: none;
   user-select: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
 }
 
 [hidden] {
@@ -139,208 +159,333 @@ button {
   outline-offset: 2px;
 }
 
-/* 스크롤바 커스텀 */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: rgba(var(--ink-panel-rgb), 0.8); }
-::-webkit-scrollbar-thumb { background: var(--ink-body); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+/* 스크롤바 — 표준 속성 (Chrome 121+, Firefox, Safari 대체 없음 시 기본) */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--hanji-edge) transparent;
+}
 
-/* 낙관(푸른색 전각 도장) 공통 스타일 */
+/* 표지 한자 — 예전 주홍 낙관 자리. 상자 없이, 제목 뒤에 아주 흐린 큰 글자로 깔립니다.
+   (어디에 어떻게 깔릴지는 각 위치에서 정하고, 기본값은 숨김) */
 .seal-stamp {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: 28px;
-  height: 28px;
-  background: var(--vermilion);
-  color: var(--seal-text);
-  border: 1.5px solid var(--seal-border);
-  border-radius: 3px;
+  display: none;
   font-family: var(--font-serif);
   font-weight: 700;
-  font-size: 13px;
-  letter-spacing: 0;
-  vertical-align: middle;
-  transform: rotate(-3deg);            /* 손으로 찍은 낙관 느낌 */
+  line-height: 1;
+  color: rgba(var(--accent-rgb), 0.07);
+  pointer-events: none;
+  user-select: none;
 }
 
-/* 동양풍 버튼 스타일 */
-.btn-oriental {
-  background: linear-gradient(180deg, rgba(var(--btn-top-rgb), 0.92) 0%, rgba(var(--btn-bottom-rgb), 0.96) 100%);
-  color: var(--text-button);
-  border: 1px solid rgba(var(--accent-rgb), 0.45);
-  padding: 8px 18px;
-  font-family: var(--font-sans);
-  font-size: 13px;
-  font-weight: 500;
-  letter-spacing: 2px;
-  white-space: nowrap;
-  cursor: pointer;
-  transition: border-color 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1),
-    color 0.3s ease, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  border-radius: 4px;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
-}
-
-.btn-oriental::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb), 0.18), transparent);
-  transition: left 0.5s;
-}
-
-.btn-oriental:hover::before { left: 100%; }
-
-.btn-oriental:hover,
-.btn-oriental:focus-visible {
-  border-color: var(--accent);
-  box-shadow: 0 0 12px var(--accent-glow);
-  color: var(--accent-pale);
-  transform: translateY(-1px);
-}
-
-/* 원형 닫기(✕) 버튼 — 족자·모달 공용. 위치는 각 컨테이너에서 지정합니다. */
+/* 아이콘 버튼 (✕ 닫기) — 족자·비록 창 공용. 한지 위에서 쓰입니다. 위치는 각 컨테이너에서 지정 */
 .btn-close {
   flex-shrink: 0;
-  background: transparent;
-  border: 1px solid var(--accent-border);
-  color: var(--accent);
-  width: 28px;
-  height: 28px;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
   border-radius: 50%;
+  background: transparent;
+  color: var(--ink-soft);
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  line-height: 1;
-  transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .btn-close:hover,
 .btn-close:focus-visible {
-  background: rgba(var(--accent-rgb), 0.2);
-  transform: rotate(90deg);
-  border-color: var(--accent);
-  color: var(--accent-pale);
-}
-
-/* 한지 바탕(족자·모달) 위의 닫기 버튼 */
-.btn-close.on-hanji {
-  background: var(--hanji);
-  border-color: var(--accent-dark);
-  color: var(--wood-light);
-}
-
-.btn-close.on-hanji:hover,
-.btn-close.on-hanji:focus-visible {
-  background: rgba(var(--vermilion-rgb), 0.1);
-  border-color: var(--vermilion);
+  background: rgba(var(--vermilion-rgb), 0.09);
   color: var(--vermilion);
 }
 
+.btn-close:focus-visible {
+  outline-color: var(--vermilion);
+}
+
 /* ==========================================================================
-   세계관 및 등장인물 모달 (Modal) — 한지 서책
+   비록(秘錄) 창 — 네이티브 <dialog> + 탭
    ========================================================================== */
 .modal {
-  position: fixed;
-  inset: 0;
-  z-index: 500;
-  background: rgba(var(--backdrop-rgb), 0.85);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.modal.visible {
-  opacity: 1;
-}
-
-.modal-scroll-card {
-  width: min(720px, 100%);
-  max-height: min(85vh, calc(var(--vh-full) - 32px));
-  background: linear-gradient(180deg, var(--hanji) 0%, var(--hanji-deep) 100%);
-  border: 1px solid var(--accent-dark);
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8);
+  margin: auto;
+  width: min(820px, calc(100% - 24px));
+  max-width: none;
+  height: min(720px, calc(100dvh - 32px));
+  max-height: none;
+  padding: 0;
+  border: 1px solid rgba(var(--accent-dark-rgb), 0.55);
   border-radius: 4px;
-  display: flex;
-  flex-direction: column;
+  background: var(--hanji-surface);
+  color: var(--ink);
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(0, 0, 0, 0.4);
   overflow: hidden;
-  transform: translateY(12px);
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  flex-direction: column;
+
+  /* 열고 닫을 때 페이드 + 살짝 떠오름 (display/overlay 까지 전환해 닫힐 때도 애니메이션) */
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.35s var(--ease-out), transform 0.35s var(--ease-out),
+    overlay 0.35s allow-discrete, display 0.35s allow-discrete;
 }
 
-.modal.visible .modal-scroll-card {
+/* 판면 안쪽 괘선 */
+.modal::after {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+.modal[open] {
+  display: flex;
+  opacity: 1;
   transform: none;
 }
 
+@starting-style {
+  .modal[open] {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+.modal::backdrop {
+  background: rgba(var(--backdrop-rgb), 0);
+  backdrop-filter: blur(0);
+  transition: background-color 0.35s ease, backdrop-filter 0.35s ease,
+    overlay 0.35s allow-discrete, display 0.35s allow-discrete;
+}
+
+.modal[open]::backdrop {
+  background: rgba(var(--backdrop-rgb), 0.78);
+  backdrop-filter: blur(6px);
+}
+
+@starting-style {
+  .modal[open]::backdrop {
+    background: rgba(var(--backdrop-rgb), 0);
+    backdrop-filter: blur(0);
+  }
+}
+
 .modal-header {
-  padding: 18px 24px;
-  border-bottom: 1px solid rgba(var(--accent-dark-rgb), 0.4);
+  position: relative;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  background: rgba(var(--accent-dark-rgb), 0.12);
+  gap: 14px;
+  padding: 26px 22px 6px 34px;
+}
+
+/* 비록 창 머리의 큰 흐린 한자 */
+.modal-header .seal-stamp {
+  display: block;
+  position: absolute;
+  right: 70px;
+  top: 6px;
+  font-size: 96px;
+}
+
+.modal-heading {
+  flex: 1;
+  min-width: 0;
+}
+
+.modal-kicker {
+  font-size: 11px;
+  letter-spacing: 0.5em;
+  color: var(--accent-dark);
 }
 
 .modal-header h2 {
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 700;
-  color: var(--ink);
-  letter-spacing: 2px;
+  line-height: 1.3;
+  color: var(--ink-strong);
+  letter-spacing: 0.06em;
+}
+
+/* 탭 — 글자 아래 주홍 붓선 */
+.modal-tabs {
+  flex-shrink: 0;
   display: flex;
-  align-items: center;
-  gap: 10px;
+  gap: 4px;
+  margin: 14px 34px 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.modal-tabs [role="tab"] {
+  position: relative;
+  padding: 10px 14px 12px;
+  background: none;
+  border: 0;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.modal-tabs [role="tab"]::after {
+  content: '';
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: -1px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--vermilion);
+  transform: scaleX(0);
+  transition: transform 0.3s var(--ease-out);
+}
+
+.modal-tabs [role="tab"]:hover {
+  color: var(--ink);
+}
+
+.modal-tabs [role="tab"][aria-selected="true"] {
+  color: var(--ink-strong);
+  font-weight: 700;
+}
+
+.modal-tabs [role="tab"][aria-selected="true"]::after {
+  transform: scaleX(1);
+}
+
+.modal-tabs [role="tab"]:focus-visible {
+  outline-color: var(--vermilion);
+  outline-offset: -4px;
 }
 
 .modal-body {
-  padding: 24px 28px;
+  flex: 1;
+  min-height: 0;
+  padding: 22px 34px 34px;
   overflow-y: auto;
   overscroll-behavior: contain;
   font-size: 14px;
+  line-height: 1.75;
+  color: var(--ink-body);
+  outline: none;
+  /* 아래로 넘치는 글이 판면 괘선에 걸리지 않도록 끝을 흐리게 */
+  -webkit-mask-image: linear-gradient(180deg, #000 calc(100% - 28px), transparent);
+  mask-image: linear-gradient(180deg, #000 calc(100% - 28px), transparent);
+}
+
+.modal-body[hidden] {
+  display: none;
+}
+
+.modal-lead {
+  font-size: 15px;
   line-height: 1.8;
   color: var(--ink);
-}
-
-.modal-body h3 {
-  color: var(--vermilion-ink);
-  font-size: 16px;
-  font-weight: 700;
-  margin: 18px 0 8px;
-  letter-spacing: 1px;
-}
-
-.modal-body ul {
-  padding-left: 20px;
-  margin-bottom: 12px;
-  color: var(--ink-body);
-}
-
-.modal-body li {
   margin-bottom: 6px;
 }
 
+.modal-lead strong {
+  color: var(--ink-strong);
+}
+
+/* 도감 목록 — 상자 없이 괘선으로 나눈 두 단 */
+.codex {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+  column-gap: 36px;
+  list-style: none;
+}
+
+.codex-card {
+  padding: 20px 0 18px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.codex-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.codex-head .seal-stamp {
+  display: none;
+}
+
+.codex-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  color: var(--ink-label);
+  letter-spacing: 0.06em;
+}
+
+/* 세력 색 점 */
+.codex-eyebrow::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--faction-color, var(--vermilion));
+}
+
+.codex-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink-strong);
+  line-height: 1.35;
+  letter-spacing: 0.04em;
+}
+
+.codex-title small {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--accent-dark);
+  margin-left: 6px;
+}
+
+.codex-card ul {
+  list-style: none;
+  font-size: 13.5px;
+}
+
+.codex-card li + li {
+  margin-top: 6px;
+}
+
+.codex-card strong {
+  color: var(--vermilion-ink);
+  font-weight: 700;
+}
+
+.codex-card dl {
+  font-size: 13.5px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 14px;
+}
+
+.codex-card dt {
+  color: var(--ink-label);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  padding-top: 2px;
+}
+
 @media (max-width: 640px) {
-  .modal { padding: 10px; }
-  .modal-header { padding: 14px 16px; }
-  .modal-header h2 { font-size: 16px; letter-spacing: 1px; }
-  .modal-body { padding: 18px 18px; font-size: 13px; }
+  .modal {
+    width: calc(100% - 16px);
+    height: calc(100dvh - 16px);
+  }
+  .modal-header { padding: 20px 14px 4px 22px; gap: 12px; }
+  .modal-header .seal-stamp { right: 56px; font-size: 80px; }
+  .modal-header h2 { font-size: 20px; }
+  .modal-tabs { margin: 10px 22px 0; }
+  .modal-body { padding: 16px 22px 28px; font-size: 13px; }
 }
 
 /* ==========================================================================

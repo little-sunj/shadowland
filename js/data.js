@@ -9,12 +9,21 @@
 //  landmarks : 소거점 — parent 가 있으면 그 지점의 족자에, 없으면 소속 구역 족자에 표시
 //  notice    : 족자 하단 경고 상자 { title, text } (선택)
 //  x, y      : 지도 위 위치핀 자리 (모든 지점·거점은 같은 위치핀을 쓰고, 지점은 조금 크게 표시됩니다)
+//  image     : 족자 맨 위에 깔리는 대표 그림 (선택). 없으면 그림 없이 열립니다
 //  seal      : 족자에 찍히는 낙관 글자
+//  color     : 구역 하이라이트·세력권 고리·모달 카드 띠 색 — 먹·주홍과 어울리는 석채(돌 안료) 톤
+//  characters: 인물 — faction 은 sites 의 id (모달 카드의 낙관·색·소속 표기에 씀)
 // ==========================================================================
 const WORLD_DATA = {
   worldName: "황량계",
   worldHanja: "荒涼界",
   worldDescription: "국가도, 법도, 왕도도 없으며 오직 힘과 권력만이 유일한 법인 날것 그대로의 무법 대륙입니다.",
+  // 배경음악 — 파일 이름에 공백이 있어도 됩니다 (자동으로 주소 변환)
+  bgm: {
+    src: "assets/sound/gaze of a shadow.mp3",
+    title: "Gaze of a Shadow",
+    volume: 0.45
+  },
   map: {
     image: "assets/images/shadowland_map.webp",
     width: 2464,
@@ -58,7 +67,7 @@ const WORLD_DATA = {
         "<strong>밤에는 바다 괴수가 출몰</strong>하므로, 배로 건너려면 반드시 낮에만 이동해야 합니다."
       ],
       seal: "海",
-      color: "#60a5fa",
+      color: "#4a6b7c",
       label: { x: 1150, y: 720, size: 42 },
       polygon: "820,640 1000,560 1250,560 1480,620 1560,760 1520,960 1380,1080 1150,1110 920,1060 780,930 760,780"
     },
@@ -80,7 +89,7 @@ const WORLD_DATA = {
         "혹한과 칼바람, 극히 드문 인적"
       ],
       seal: "北",
-      color: "#cbd5e1",
+      color: "#7d8790",
       label: { x: 1250, y: 250, size: 46 },
       polygon: "900,40 1900,50 2420,70 2430,390 2150,420 1850,430 1560,600 1480,620 1250,560 1000,560 930,420"
     },
@@ -102,7 +111,7 @@ const WORLD_DATA = {
         "의뢰와 현상금이 오가는 무법의 땅"
       ],
       seal: "西",
-      color: "#f59e0b",
+      color: "#b07a35",
       label: { x: 230, y: 330, size: 46 },
       polygon: "40,60 900,40 930,420 1000,560 820,640 760,780 780,930 920,1060 700,1050 300,1000 60,1000 30,600"
     },
@@ -124,7 +133,7 @@ const WORLD_DATA = {
         "동남쪽으로 이어지는 험준한 산맥"
       ],
       seal: "東",
-      color: "#a78bfa",
+      color: "#6e5482",
       label: { x: 2150, y: 690, size: 46 },
       polygon: "2430,390 2430,1500 1900,1560 1550,1520 1300,1560 1280,1300 1380,1080 1520,960 1560,760 1560,600 1850,430 2150,420"
     },
@@ -146,7 +155,7 @@ const WORLD_DATA = {
         "길을 잃으면 살아 나오기 어려운 험지"
       ],
       seal: "南",
-      color: "#34d399",
+      color: "#4c7a5e",
       label: { x: 870, y: 1380, size: 46 },
       polygon: "60,1000 300,1000 700,1050 920,1060 1150,1110 1380,1080 1280,1300 1300,1560 1150,1660 1000,1640 700,1790 300,1460 60,1300"
     }
@@ -154,6 +163,7 @@ const WORLD_DATA = {
   sites: {
     yuryeonggok: {
       id: "yuryeonggok",
+      image: "https://i.imgur.com/VTXfYgx.png",
       name: "유령곡",
       hanja: "幽靈谷",
       direction: "북부",
@@ -175,7 +185,7 @@ const WORLD_DATA = {
         "귀신이 곡하는 소리 같은 거센 산바람이 부는 험준한 산악 고지대이며, 사나운 야수가 서식합니다."
       ],
       seal: "幽",
-      color: "#cbd5e1",
+      color: "#7d8790",
       region: "north",
       x: 2310,
       y: 230,
@@ -183,6 +193,7 @@ const WORLD_DATA = {
     },
     churadae: {
       id: "churadae",
+      image: "https://i.imgur.com/ys4haTA.png",
       name: "추라대",
       hanja: "追羅隊",
       direction: "서부",
@@ -204,7 +215,7 @@ const WORLD_DATA = {
         "돈과 유명세를 위해서라면 수단과 방법을 가리지 않습니다."
       ],
       seal: "追",
-      color: "#f59e0b",
+      color: "#b07a35",
       region: "west",
       x: 380,
       y: 560,
@@ -213,6 +224,7 @@ const WORLD_DATA = {
     },
     myeongjogung: {
       id: "myeongjogung",
+      image: "https://i.imgur.com/1Oh2VYU.png",
       name: "명조궁",
       hanja: "冥朝宮",
       direction: "동부",
@@ -234,7 +246,7 @@ const WORLD_DATA = {
         "대부호와 권력자들이 배후이며, 마을과 군락에 보호 명목으로 세금을 걷습니다. 남부 흑사당과 대립합니다."
       ],
       seal: "冥",
-      color: "#a78bfa",
+      color: "#6e5482",
       region: "east",
       x: 1760,
       y: 830,
@@ -243,6 +255,7 @@ const WORLD_DATA = {
     },
     heuksadang: {
       id: "heuksadang",
+      image: "https://i.imgur.com/5mPLMMS.png",
       name: "흑사당",
       hanja: "黑蛇堂",
       direction: "남부",
@@ -264,7 +277,7 @@ const WORLD_DATA = {
         "명조궁의 확장을 경계하며 피비린내 나는 대립을 이어가고 있습니다."
       ],
       seal: "蛇",
-      color: "#34d399",
+      color: "#4c7a5e",
       region: "south",
       x: 450,
       y: 1170,
@@ -292,7 +305,7 @@ const WORLD_DATA = {
         "대륙 군데군데 작은 마을들이 분포해 있으며, 주로 동부 명조궁의 영향력을 크게 받습니다."
       ],
       seal: "村",
-      color: "#10b981",
+      color: "#8a7350",
       loreTitle: "군락과 마을",
       region: null
     }
@@ -363,25 +376,29 @@ const WORLD_DATA = {
       y: 1060
     }
   ],
-  charactersIntro: "의 패권과 무법의 질서를 이끄는 각 세력의 주요 인물들입니다.",
+  charactersIntro: "무법의 대륙에서 각 세력을 이끄는 주요 인물들입니다.",
   characters: [
     {
-      heading: "서부 추라대: 사냥꾼 연합 총수",
+      faction: "churadae",
+      title: "사냥꾼 연합 총수",
       position: "서부 현상금 사냥꾼 연합 총수",
       traits: "무거운 대도를 휘두르며 철저한 은자와 신의(信義)로 수천 명의 무법 사냥꾼들을 통솔합니다. 돈을 위해 살지만 '한 번 맺은 계약은 목숨 걸고 완수한다'는 철칙을 고수합니다."
     },
     {
-      heading: "동부 명조궁: 명조궁주",
+      faction: "myeongjogung",
+      title: "명조궁주",
       position: "동부 거대 패권 세력 명조궁의 절대 권력자",
       traits: "황량계 각지의 무역로와 상단을 장악하고 막대한 부를 바탕으로 대륙의 질서를 배후에서 재편하려는 냉철한 지략가입니다."
     },
     {
-      heading: "남부 흑사당: 흑사당주",
+      faction: "heuksadang",
+      title: "흑사당주",
       position: "남부 독무림 살수(살인 청부) 집단 두령",
       traits: "독과 암기, 은신술의 정점에 선 자로, 표적으로 찍힌 자는 결코 살아남지 못한다는 악명이 자자합니다. 명조궁의 확장을 막기 위해 피비린내 나는 암투를 지휘합니다."
     },
     {
-      heading: "북부 유령곡: 은거 야수사",
+      faction: "yuryeonggok",
+      title: "은거 야수사",
       position: "북부 극한 고지대의 수수께끼 기인",
       traits: "원혼의 곡소리가 끊이지 않는 험준한 유령곡의 칼바람 속에서 거대한 맹수와 영수들을 부리며 홀로 살아가는 신비로운 인물입니다."
     }

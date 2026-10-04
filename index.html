@@ -55,11 +55,11 @@
     <div class="intro-content">
       <h1 class="intro-title" lang="zh-Hant">荒涼界</h1>
       <p class="intro-korean">황량계</p>
-      <div class="intro-cta" aria-hidden="true">
-        <span class="cta-icon">
-          <svg fill="currentColor" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M11.71 17.99A5.993 5.993 0 0 1 6 12c0-3.31 2.69-6 6-6 3.22 0 5.84 2.53 5.99 5.71l-2.1-.63a3.999 3.999 0 1 0-4.81 4.81l.63 2.1zM22 12c0 .3-.01.6-.04.9l-1.97-.59c.01-.1.01-.21.01-.31 0-4.42-3.58-8-8-8s-8 3.58-8 8 3.58 8 8 8c.1 0 .21 0 .31-.01l.59 1.97c-.3.03-.6.04-.9.04-5.52 0-10-4.48-10-10S6.48 2 12 2s10 4.48 10 10zm-3.77 4.26L22 15l-10-3 3 10 1.26-3.77 4.27 4.27 1.98-1.98-4.28-4.26z"/></svg>
-        </span>
-      </div>
+      <p class="intro-cta" aria-hidden="true">
+        <span class="cta-line"></span>
+        <span class="cta-text">안개 걷기</span>
+        <span class="cta-line"></span>
+      </p>
     </div>
   </div>
 
@@ -70,29 +70,51 @@
   <div id="main-screen" inert>
 
     <header class="top-hud">
-      <div class="brand-section">
-        <p class="brand-title">황량계</p>
+      <div class="hud-left">
+        <!-- 로고 = 홈: 누르면 족자를 닫고 전도 전체로 돌아갑니다 -->
+        <button type="button" id="btn-home" class="hud-surface brand" aria-label="황량계 — 전도 전체 보기">
+          <span class="brand-title" aria-hidden="true">황량계</span>
+          <span class="brand-hanja" lang="zh-Hant" aria-hidden="true">荒涼界</span>
+        </button>
+
+        <!-- 배경음악 플레이어 — 곡 정보는 js/data.js 의 bgm. 인트로를 걷는 순간 자동 재생 -->
+        <div class="hud-surface bgm" id="bgm-player">
+          <button type="button" class="bgm-toggle" id="btn-bgm" aria-pressed="false" aria-label="배경음악 재생">
+            <svg class="bgm-icon-play" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg>
+            <svg class="bgm-icon-pause" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M7.5 5.5h3v13h-3zM13.5 5.5h3v13h-3z" fill="currentColor"/></svg>
+          </button>
+          <span class="bgm-eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+          <span class="bgm-title" id="bgm-title"></span>
+          <label class="bgm-volume" title="볼륨">
+            <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><path class="bgm-wave" d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            <input type="range" id="bgm-volume" min="0" max="100" step="1" aria-label="배경음악 볼륨">
+          </label>
+        </div>
+        <audio id="bgm-audio" preload="auto" loop></audio>
       </div>
 
-      <nav class="util-controls" aria-label="지도 도구">
-        <button type="button" id="btn-lore-modal" class="btn-oriental" aria-haspopup="dialog">세계관</button>
-        <button type="button" id="btn-characters-modal" class="btn-oriental" aria-haspopup="dialog">등장인물</button>
+      <nav class="hud-surface util-controls" aria-label="세계관 도감">
+        <button type="button" class="hud-btn" data-open-codex="lore" aria-haspopup="dialog">
+          <span class="hud-glyph" lang="zh-Hant" aria-hidden="true">界</span>세계관
+        </button>
+        <button type="button" class="hud-btn" data-open-codex="people" aria-haspopup="dialog">
+          <span class="hud-glyph" lang="zh-Hant" aria-hidden="true">人</span>등장인물
+        </button>
       </nav>
     </header>
 
-    <!-- 하단 조작 안내 힌트 (입력 장치에 따라 문구가 바뀝니다) -->
+    <!-- 하단 조작 안내 힌트 (입력 장치에 따라 문구가 바뀌고, 처음 조작하면 사라집니다) -->
     <div class="map-hint" aria-hidden="true">
-      <span class="hint-badge">◈ 지도 탐색</span>
-      <span class="hint-text hint-mouse">드래그: 이동 | 휠: 확대/축소 | 구역·거점 클릭: 족자 열람</span>
-      <span class="hint-text hint-touch">밀어서 이동 | 두 손가락: 확대/축소 | 탭: 족자 열람</span>
+      <span class="hint-text hint-mouse"><kbd>드래그</kbd> 이동 <kbd>휠</kbd> 확대·축소 <kbd>클릭</kbd> 족자 열람</span>
+      <span class="hint-text hint-touch"><kbd>밀기</kbd> 이동 <kbd>두 손가락</kbd> 확대 <kbd>탭</kbd> 족자 열람</span>
     </div>
 
     <!-- 확대/축소 버튼 -->
     <div class="zoom-controls" role="group" aria-label="확대/축소">
-      <button type="button" id="btn-zoom-in" class="btn-oriental btn-zoom" aria-label="확대">
+      <button type="button" id="btn-zoom-in" class="btn-zoom" aria-label="확대">
         <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
       </button>
-      <button type="button" id="btn-zoom-out" class="btn-oriental btn-zoom" aria-label="축소">
+      <button type="button" id="btn-zoom-out" class="btn-zoom" aria-label="축소">
         <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
       </button>
     </div>
@@ -132,13 +154,6 @@
 
           <!-- 6. 지점·거점 마커 — sites[] · landmarks[] 로 생성 -->
           <g id="markers-layer"></g>
-
-          <!-- 7. 우측 하단 고지도 낙관 도장 -->
-          <g id="map-legend-stamp" class="map-decor" transform="translate(2180, 1730) scale(1.6)" aria-hidden="true">
-            <rect class="stamp-box" x="0" y="0" width="130" height="60" rx="3" />
-            <text class="map-text stamp-title" x="16" y="25">荒涼界 輿地圖</text>
-            <text class="map-text stamp-sub" x="16" y="44">無法之界 · 力量至上</text>
-          </g>
         </svg>
       </div>
     </main>
@@ -148,9 +163,9 @@
          ================================================================== -->
     <aside id="info-panel" aria-labelledby="panel-title" inert>
       <div class="scroll-rod" aria-hidden="true"></div>
-      <button type="button" id="btn-close-scroll" class="btn-close on-hanji" aria-label="족자 닫기">✕</button>
+      <button type="button" id="btn-close-scroll" class="btn-close" aria-label="족자 닫기"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/></svg></button>
       <div class="scroll-body">
-        <div id="panel-content" aria-live="polite"></div>
+        <div id="panel-content"></div>
       </div>
       <div class="scroll-rod" aria-hidden="true"></div>
     </aside>
@@ -160,32 +175,32 @@
   </div>
 
   <!-- ==================================================================
-       4. 세계관 / 등장인물 모달 — 본문은 js/data.js 에서 생성
+       4. 비록(秘錄) — 세계관 / 등장인물을 탭으로 담은 창. 본문은 js/data.js 에서 생성
        ================================================================== -->
-  <div id="lore-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="lore-modal-title" hidden>
-    <div class="modal-scroll-card">
-      <div class="modal-header">
-        <h2 id="lore-modal-title"><span class="seal-stamp" aria-hidden="true">記</span> 황량계(荒涼界) 세계관 비록(秘錄)</h2>
-        <button type="button" class="btn-close on-hanji" data-close-modal aria-label="세계관 닫기">✕</button>
+  <dialog id="codex" class="modal" aria-labelledby="codex-title">
+    <header class="modal-header">
+      <span class="seal-stamp" aria-hidden="true">記</span>
+      <div class="modal-heading">
+        <p class="modal-kicker" lang="zh-Hant">荒涼界 秘錄</p>
+        <h2 id="codex-title">황량계 비록</h2>
       </div>
-      <div class="modal-body" id="lore-modal-body"></div>
-    </div>
-  </div>
+      <button type="button" class="btn-close" data-close-modal aria-label="닫기"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/></svg></button>
+    </header>
 
-  <div id="characters-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="characters-modal-title" hidden>
-    <div class="modal-scroll-card">
-      <div class="modal-header">
-        <h2 id="characters-modal-title"><span class="seal-stamp" aria-hidden="true">人</span> 황량계(荒涼界) 주요 인물</h2>
-        <button type="button" class="btn-close on-hanji" data-close-modal aria-label="등장인물 닫기">✕</button>
-      </div>
-      <div class="modal-body" id="characters-modal-body"></div>
+    <div class="modal-tabs" role="tablist" aria-label="비록 분류">
+      <button type="button" role="tab" id="tab-lore" aria-controls="codex-lore" aria-selected="true">세계관</button>
+      <button type="button" role="tab" id="tab-people" aria-controls="codex-people" aria-selected="false" tabindex="-1">등장인물</button>
     </div>
-  </div>
+
+    <div class="modal-body" role="tabpanel" id="codex-lore" aria-labelledby="tab-lore" tabindex="0"></div>
+    <div class="modal-body" role="tabpanel" id="codex-people" aria-labelledby="tab-people" tabindex="0" hidden></div>
+  </dialog>
 
   <!-- 스크립트 (file:// 로 더블클릭해도 동작하도록 일반 스크립트로 로드) -->
   <script src="js/data.js"></script>
   <script src="js/intro.js"></script>
   <script src="js/map.js"></script>
+  <script src="js/bgm.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>

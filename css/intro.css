@@ -116,68 +116,53 @@
   padding-left: var(--korean-spacing);
   opacity: 0.85;
   text-shadow: 0 0 15px var(--accent-glow);
-  margin-bottom: 48px;
+  margin-bottom: 56px;
 }
 
-/* 입장 유도 아이콘 */
+/* 입장 안내 — 양옆으로 가는 선 사이의 작은 글씨 */
 .intro-cta {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  padding: 8px;
-  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  gap: 14px;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  letter-spacing: 0.4em;
+  padding-left: 0.4em;
+  color: var(--accent);
+  animation: ctaBreathe 3.2s infinite ease-in-out;
+}
+
+.cta-line {
+  width: 40px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb), 0.7));
+  transition: width 0.5s var(--ease-out);
+}
+
+.cta-line:last-child {
+  background: linear-gradient(270deg, transparent, rgba(var(--accent-rgb), 0.7));
 }
 
 #intro-screen:hover .intro-cta,
 #intro-screen:focus-visible .intro-cta {
-  transform: translateY(-2px);
-}
-
-.cta-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  color: var(--accent);
-  background: radial-gradient(circle, rgba(var(--accent-rgb), 0.16) 0%, rgba(var(--ink-panel-rgb), 0) 70%);
-  border: 1px solid rgba(var(--accent-rgb), 0.25);
-  animation: ctaPulse 2.4s infinite ease-in-out;
-  transition: color 0.35s ease, border-color 0.35s ease, background 0.35s ease;
-}
-
-.cta-icon svg {
-  width: 24px;
-  height: 24px;
-  fill: currentColor;
-  filter: drop-shadow(0 0 8px rgba(var(--accent-rgb), 0.5));
-  transition: filter 0.3s ease;
-}
-
-#intro-screen:hover .cta-icon,
-#intro-screen:focus-visible .cta-icon {
   color: var(--accent-pale);
-  border-color: rgba(var(--accent-rgb), 0.5);
-  background: radial-gradient(circle, rgba(var(--accent-rgb), 0.32) 0%, rgba(var(--ink-panel-rgb), 0) 75%);
+  animation-play-state: paused;
+  opacity: 1;
 }
 
-#intro-screen:hover .cta-icon svg,
-#intro-screen:focus-visible .cta-icon svg {
-  filter: drop-shadow(0 0 16px rgba(var(--accent-rgb), 0.95));
+#intro-screen:hover .cta-line,
+#intro-screen:focus-visible .cta-line {
+  width: 72px;
 }
 
-@keyframes ctaPulse {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 0.75;
-    box-shadow: 0 0 15px rgba(var(--accent-rgb), 0.15);
-  }
-  50% {
-    transform: scale(1.08);
-    opacity: 1;
-    box-shadow: 0 0 25px rgba(var(--accent-rgb), 0.4);
-  }
+@keyframes ctaBreathe {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
+/* 인트로 화면 자체에 키보드 포커스가 왔을 때 — 화면 테두리 대신 안내 글씨만 강조 */
+#intro-screen:focus-visible {
+  outline: none;
 }
 
 /* ==========================================================================

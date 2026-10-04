@@ -19,6 +19,18 @@ function iconHtml(name) {
   return `<svg class="icon" aria-hidden="true"><use href="#i-${name}"/></svg>`;
 }
 
+// 위험 등급 문자열("★★★★☆ (주간) / ★★★★★ (야간 극위험)")을 다섯 칸 눈금으로 바꿉니다
+function dangerHtml(level) {
+  return `<span class="danger">${String(level).split('/').map((part) => {
+    const count = (part.match(/★/g) || []).length;
+    const note = (part.match(/\(([^)]+)\)/) || [])[1] || '';
+    const pips = Array.from({ length: 5 }, (_, i) => `<i${i < count ? ' class="on"' : ''}></i>`).join('');
+    return `<span class="danger-item" role="img" aria-label="위험 ${count}/5${note ? ` (${escapeHtml(note)})` : ''}">
+      <span class="danger-pips" aria-hidden="true">${pips}</span>${note ? `<span class="danger-note" aria-hidden="true">${escapeHtml(note)}</span>` : ''}
+    </span>`;
+  }).join('')}</span>`;
+}
+
 function svgEl(tag, attrs = {}) {
   const el = document.createElementNS(SVG_NS, tag);
   for (const [key, val] of Object.entries(attrs)) {
@@ -61,6 +73,7 @@ class FantasyMap {
 
     this.animId = null;
     this.selection = null;       // { kind, id, landmark }
+    this.hasInteracted = false;  // 사용자가 지도를 직접 움직였는지 (조작 안내 숨김용)
     this.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     this.canHover = window.matchMedia('(hover: hover)');   // 터치 기기에서는 호버 툴팁 생략
 
@@ -301,25 +314,28 @@ class FantasyMap {
     const occ = this.panelOcclusion();
 
     // 지도가 '보이는 영역'(족자에 가려지지 않은 부분)보다 작으면 그 영역 가운데에, 크면 여유 범위 안에서 자유롭게
-    const visW = vw - occ.right;
+    const visW = vw - occ.left - occ.right;
     const visH = vh - occ.bottom;
-    const x = curW <= visW ? (visW - curW) / 2 : Math.min(Math.max(tx, vw - curW - m - occ.right), m);
+    const x = curW <= visW
+      ? occ.left + (visW - curW) / 2
+      : Math.min(Math.max(tx, vw - curW - m - occ.right), m + occ.left);
     const y = curH <= visH ? (visH - curH) / 2 : Math.min(Math.max(ty, vh - curH - m - occ.bottom), m);
     return { x, y };
   }
 
-  // 족자 패널이 화면 오른쪽(데스크톱) 또는 아래쪽(모바일 하단 시트)을 가리는 폭/높이(px)
+  // 족자 패널이 화면 왼쪽/오른쪽(데스크톱) 또는 아래쪽(모바일 하단 시트)을 가리는 폭/높이(px)
   panelOcclusion() {
-    const none = { right: 0, bottom: 0 };
+    const none = { left: 0, right: 0, bottom: 0 };
     if (!this.infoPanel || !this.infoPanel.classList.contains('active')) return none;
     const { vw } = this.viewportSize();
     const cs = getComputedStyle(this.infoPanel);
     const w = this.infoPanel.offsetWidth;       // offset* 는 등장 애니메이션(transform)의 영향을 받지 않음
     const h = this.infoPanel.offsetHeight;
     const isSheet = w >= vw * 0.8;
-    return isSheet
-      ? { right: 0, bottom: h + (parseFloat(cs.bottom) || 0) }
-      : { right: w + (parseFloat(cs.right) || 0), bottom: 0 };
+    if (isSheet) return { ...none, bottom: h + (parseFloat(cs.bottom) || 0) };
+    return this.infoPanel.classList.contains('is-left')
+      ? { ...none, left: w + (parseFloat(cs.left) || 0) }
+      : { ...none, right: w + (parseFloat(cs.right) || 0) };
   }
 
   // 패널과 상단 HUD 에 가려지지 않는 '실제로 보이는' 영역의 중심 (뷰포트 좌표)
@@ -330,7 +346,7 @@ class FantasyMap {
     const vpTop = this.viewport.getBoundingClientRect().top;
     const top = hud ? Math.max(0, hud.getBoundingClientRect().bottom - vpTop) : 0;
     return {
-      x: (vw - occ.right) / 2,
+      x: occ.left + (vw - occ.left - occ.right) / 2,
       y: top + (vh - occ.bottom - top) / 2
     };
   }
@@ -353,7 +369,7 @@ class FantasyMap {
     this.isFitted = false;
   }
 
-  fitToScreen(animate = false) {
+  fitToScreen(animate = false, duration = 750) {
     this.updateScaleLimits();
     const scale = this.computeFitScale();
     const { vw, vh } = this.viewportSize();
@@ -369,12 +385,23 @@ class FantasyMap {
     }
 
     if (animate) {
-      this.animateTo(tx, ty, scale);
+      this.animateTo(tx, ty, scale, duration);
     } else {
       this.cancelAnimation();
       this.setTransform(tx, ty, scale);
     }
     this.isFitted = true;
+  }
+
+  // 인트로 동안: 지도를 살짝 당겨 둔 상태로 대기 → 안개가 걷히면 전도 전체로 천천히 물러납니다
+  prepareReveal(mapX, mapY, zoom = 1.18) {
+    const scale = this.clampScale(this.computeFitScale() * zoom);
+    const { vw, vh } = this.viewportSize();
+    this.setTransform(vw / 2 - mapX * scale, vh / 2 - mapY * scale, scale);
+  }
+
+  reveal() {
+    this.fitToScreen(true, 2200);
   }
 
   handleResize() {
@@ -434,12 +461,20 @@ class FantasyMap {
 
   // 보이는 영역 중심을 기준으로 부드럽게 확대/축소 (+/− 버튼, 키보드)
   zoomBy(factor) {
+    this.markInteracted();
     const newScale = this.clampScale(this.scale * factor);
     if (newScale === this.scale) return;
     const c = this.visibleCenter();
     const ratio = newScale / this.scale;
     this.animateTo(c.x - (c.x - this.translateX) * ratio, c.y - (c.y - this.translateY) * ratio, newScale, 220);
     this.isFitted = false;
+  }
+
+  // 사용자가 처음 지도를 직접 움직이면 하단 조작 안내를 숨깁니다
+  markInteracted() {
+    if (this.hasInteracted) return;
+    this.hasInteracted = true;
+    this.mainScreen.classList.add('has-interacted');
   }
 
   // 확대/축소 한계에 닿으면 해당 버튼을 비활성화
@@ -542,6 +577,7 @@ class FantasyMap {
       if (!this.suppressClick && Math.hypot(dx, dy) < this.dragThreshold) return;
       if (!this.suppressClick) this.hideTooltip();
       this.suppressClick = true;
+      this.markInteracted();
       this.setTransform(g.tx + dx, g.ty + dy, this.scale);
       this.isFitted = false;
     } else if (g.type === 'pinch' && pts.length >= 2) {
@@ -552,6 +588,7 @@ class FantasyMap {
       const scale = this.clampScale(g.scale * (Math.hypot(a.x - b.x, a.y - b.y) / g.dist));
       this.setTransform(cx - g.mapX * scale, cy - g.mapY * scale, scale);
       this.isFitted = false;
+      this.markInteracted();
     }
   }
 
@@ -571,6 +608,7 @@ class FantasyMap {
 
       const rect = this.viewport.getBoundingClientRect();
       this.zoomAt(e.clientX - rect.left, e.clientY - rect.top, this.scale * factor);
+      this.markInteracted();
     }, { passive: false });
   }
 
@@ -583,6 +621,7 @@ class FantasyMap {
 
       if (moves[e.key]) {
         e.preventDefault();
+        this.markInteracted();
         const [dx, dy] = moves[e.key];
         this.animateTo(this.translateX + dx, this.translateY + dy, this.scale, 180);
         this.isFitted = false;
@@ -653,7 +692,7 @@ class FantasyMap {
     const occ = this.panelOcclusion();
     const hud = document.querySelector('.top-hud');
     const top = hud ? hud.getBoundingClientRect().bottom - this.viewport.getBoundingClientRect().top : 0;
-    const visW = vw - occ.right;
+    const visW = vw - occ.left - occ.right;
     const visH = vh - occ.bottom - Math.max(0, top);
     const fit = this.computeFitScale();
     const scale = Math.min(this.maxScale, 1, Math.max(fit * 1.15, Math.min(visW / (x1 - x0), visH / (y1 - y0)) * 0.95));
@@ -700,11 +739,29 @@ class FantasyMap {
   // ------------------------------------------------------------------
   openInfoPanel(kind, id, landmark = null) {
     this.selection = { kind, id, landmark };
+    this.placePanelSide(kind, id, landmark);
     this.renderInfoPanel();
     this.infoPanel.classList.add('active');
     this.infoPanel.inert = false;
     this.mainScreen.classList.add('panel-open');
     this.updateSelectionHighlight();
+  }
+
+  // 선택한 곳이 지도 오른쪽 절반(동부 쪽)이면 족자를 왼쪽에, 아니면 오른쪽에 둡니다.
+  // 족자가 선택한 곳의 반대편에 뜨므로, 카메라를 지도 가장자리 밖으로 끌어낼 일이 없습니다.
+  placePanelSide(kind, id, landmark) {
+    let x = landmark ? landmark.x : undefined;
+    if (x === undefined) {
+      const data = this.entry(kind, id);
+      if (kind === 'site') x = data && data.x;
+      else if (data) {
+        const f = data.focus || this.regionFocus(data);
+        x = f && f.x;
+      }
+    }
+    const left = x !== undefined && x > this.mapWidth / 2;
+    this.infoPanel.classList.toggle('is-left', left);
+    this.mainScreen.classList.toggle('panel-left', left);
   }
 
   // 족자 안의 '바로가기' 버튼 목록 (지점 ↔ 구역 ↔ 거점 이동)
@@ -715,15 +772,15 @@ class FantasyMap {
         .forEach((s) => links.push({ key: `site:${s.id}`, label: s.name }));
       this.data.landmarks.filter((l) => l.region === data.id && !(l.parent && this.data.sites[l.parent]?.region === data.id))
         .forEach((l) => links.push({ key: `landmark:${l.id}`, label: l.shortName || l.name }));
-      return { title: '◈ 이 지역의 지점 · 거점', links };
+      return { title: '이 지역의 지점 · 거점', links };
     }
     if (data.region && this.data.regions[data.region]) {
       const r = this.data.regions[data.region];
-      links.push({ key: `region:${r.id}`, label: `${r.name} (소속 지역)` });
+      links.push({ key: `region:${r.id}`, label: `${r.name} 전역` });
     }
     this.data.landmarks.filter((l) => l.parent === data.id)
       .forEach((l) => links.push({ key: `landmark:${l.id}`, label: l.shortName || l.name }));
-    return { title: '◈ 관련 지역 · 거점', links };
+    return { title: '관련 지역 · 거점', links };
   }
 
   renderInfoPanel() {
@@ -733,65 +790,76 @@ class FantasyMap {
     if (!data) return;
     const e = escapeHtml;
 
-    const placeBox = (kicker, p) => `
-      <div class="panel-landmark">
-        <div class="panel-landmark-kicker">[ ${kicker} ]</div>
-        <div class="panel-landmark-name">${e(p.name)} <span>(${e(p.hanja)})</span></div>
-        <div class="panel-landmark-desc">${e(p.desc)}</div>
-      </div>`;
+    const placeBox = (kicker, p, focus) => `
+      <section class="panel-place${focus ? ' is-focus' : ''}">
+        <p class="eyebrow">${kicker}</p>
+        <p class="panel-place-name">${e(p.name)}<span lang="zh-Hant">${e(p.hanja)}</span></p>
+        <p class="panel-place-desc">${e(p.desc)}</p>
+      </section>`;
 
-    const landmarkHtml = landmark ? placeBox('선택된 거점', landmark) : '';
-    const keyPlaceHtml = data.keyPlace ? placeBox('본거지', data.keyPlace) : '';
+    const landmarkHtml = landmark ? placeBox('선택한 거점', landmark, true) : '';
+    const keyPlaceHtml = data.keyPlace ? placeBox('본거지', data.keyPlace, false) : '';
 
     // 주의 안내 (예: 황해의 항해 경고) — data 의 notice: { title, text }
     const noticeHtml = data.notice ? `
-        <div class="panel-notice">
+        <aside class="panel-notice" role="note">
           ${iconHtml('warning')}
           <div>
-            <strong>${e(data.notice.title)}:</strong><br>
+            <strong>${e(data.notice.title)}</strong>
             ${e(data.notice.text)}
           </div>
-        </div>` : '';
+        </aside>` : '';
 
     const rel = this.relatedLinks(kind, data);
     const linksHtml = rel.links.length ? `
-      <div class="panel-traits-title">${rel.title}</div>
+      <h3 class="panel-section-title">${e(rel.title)}</h3>
       <div class="panel-links">
         ${rel.links.map((l) => `<button type="button" class="panel-chip" data-select="${e(l.key)}">${e(l.label)}</button>`).join('')}
       </div>` : '';
 
+    // 대표 그림 (data.image) — 위에서부터 꽉 차고 아래로 갈수록 족자 바탕에 녹아듭니다
+    const heroHtml = data.image ? `
+      <div class="panel-hero">
+        <img src="${e(data.image)}" alt="" referrerpolicy="no-referrer" decoding="async">
+      </div>` : '';
+
     this.panelContent.innerHTML = `
-      <div class="panel-header">
-        <span class="panel-direction-badge">[ ${e(data.direction)} · ${e(data.category)} ]</span>
+      ${heroHtml}
+      <header class="panel-header">
+        <p class="eyebrow">${e(data.direction)} · ${e(data.category)}</p>
         <div class="panel-title-wrap">
           <h2 class="panel-name" id="panel-title">${e(data.name)}</h2>
-          <span class="panel-hanja">${e(data.hanja)}</span>
+          <span class="panel-hanja" lang="zh-Hant">${e(data.hanja)}</span>
           <span class="seal-stamp" aria-hidden="true">${e(data.seal || '法')}</span>
         </div>
-      </div>
+      </header>
 
       ${landmarkHtml}
 
-      <p class="panel-summary-quote">"${e(data.summary)}"</p>
+      <p class="panel-lead">${e(data.summary)}</p>
 
-      <table class="panel-meta-table">
-        <tr><th scope="row">지배 세력</th><td>${e(data.ruler)}</td></tr>
-        <tr><th scope="row">위험 등급</th><td class="danger">${e(data.dangerLevel)}</td></tr>
-      </table>
+      <dl class="panel-meta">
+        <dt>지배 세력</dt><dd>${e(data.ruler)}</dd>
+        <dt>위험 등급</dt><dd>${dangerHtml(data.dangerLevel)}</dd>
+      </dl>
 
       ${keyPlaceHtml}
 
       <div class="panel-desc">${e(data.description)}</div>
 
-      <div class="panel-traits-title">◈ 핵심 세계관 특성</div>
+      <h3 class="panel-section-title">핵심 특성</h3>
       <ul class="panel-traits-list">
         ${data.traits.map((t) => `<li>${e(t)}</li>`).join('')}
       </ul>
 
-      ${linksHtml}
-
       ${noticeHtml}
+
+      ${linksHtml}
     `;
+
+    // 그림을 못 불러오면 빈 칸 대신 그림 없는 족자로
+    const heroImg = this.panelContent.querySelector('.panel-hero img');
+    if (heroImg) heroImg.addEventListener('error', () => heroImg.parentElement.remove(), { once: true });
 
     this.infoPanel.querySelector('.scroll-body').scrollTop = 0;
   }
@@ -833,6 +901,15 @@ class FantasyMap {
       const btn = e.target.closest('[data-select]');
       if (btn) this.handlePanelLink(btn.dataset.select);
     });
+
+    // 로고(홈): 족자를 닫고 전도 전체로
+    const home = document.getElementById('btn-home');
+    if (home) {
+      home.addEventListener('click', () => {
+        if (this.isPanelOpen()) this.closeInfoPanel();
+        this.fitToScreen(true, 900);
+      });
+    }
 
     this.zoomInBtn.addEventListener('click', () => this.zoomBy(1.4));
     this.zoomOutBtn.addEventListener('click', () => this.zoomBy(1 / 1.4));

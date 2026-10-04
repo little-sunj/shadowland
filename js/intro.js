@@ -18,7 +18,8 @@ class IntroManager {
       this.resizeCanvas();
       this.initParticles();
       this.startMistAnimation();
-      window.addEventListener('resize', () => this.resizeCanvas());
+      this.onResize = () => this.resizeCanvas();
+      window.addEventListener('resize', this.onResize);
     }
 
     this.bindEvents();
@@ -159,6 +160,7 @@ class IntroManager {
       cancelAnimationFrame(this.animId);
       this.animId = null;
     }
+    if (this.onResize) window.removeEventListener('resize', this.onResize);
   }
 
   bindEvents() {
