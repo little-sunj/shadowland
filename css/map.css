@@ -942,7 +942,14 @@
 .region-polygon:hover,
 .region-polygon.is-selected {
   fill-opacity: var(--region-hover-opacity);
-  filter: url(#region-soft);      /* 경계가 먹물처럼 번지게 (호버·선택 시에만 계산) */
+}
+
+/* 경계가 먹물처럼 번지게 하는 흐림 — 색이 완전히 사라질 때까지 유지해야
+   마우스가 떠나는 순간 날카로운 경계가 드러나지 않습니다.
+   (is-soft 는 js 가 호버·선택 동안 붙이고, 색이 다 빠진 뒤에 뗍니다) */
+.region-polygon.is-soft,
+.region-polygon.is-selected {
+  filter: url(#region-soft);
 }
 
 /* 키보드로 선택 중일 때는 경계선까지 보여 줍니다 */
@@ -957,8 +964,10 @@
   fill-opacity: 0;
   stroke: var(--ring-color);
   stroke-opacity: 0;
-  stroke-width: 4;
-  stroke-dasharray: 12 9;
+  /* 확대 배율과 상관없이 화면에서 늘 가는 선 (굵기·점선 간격 모두 화면 px 기준) */
+  vector-effect: non-scaling-stroke;
+  stroke-width: 1.25px;
+  stroke-dasharray: 3 3;
   pointer-events: none;
   transition: fill-opacity 0.3s ease, stroke-opacity 0.3s ease;
 }
@@ -966,7 +975,7 @@
 .site-ring.is-hover,
 .site-ring.is-selected {
   fill-opacity: 0.12;
-  stroke-opacity: 0.75;
+  stroke-opacity: 0.9;
 }
 
 /* 지도 위 글자: 먹 글씨 + 한지색 외곽선(paint-order) — SVG 필터보다 훨씬 가볍습니다 */
@@ -1125,12 +1134,6 @@
   .brand-title { font-size: 16px; letter-spacing: 0.2em; margin-right: -0.2em; }
   .hud-btn { height: 32px; padding: 0 10px 0 4px; gap: 7px; font-size: 12px; }
   .hud-glyph { width: 22px; height: 22px; font-size: 12px; }
-}
-
-/* 아주 좁은 화면: 메뉴 앞 글자 칸을 빼서 로고와 메뉴가 붙지 않게 */
-@media (max-width: 380px) {
-  .hud-glyph { display: none; }
-  .hud-btn { padding: 0 10px; }
 
   .map-hint {
     bottom: max(16px, env(safe-area-inset-bottom));
@@ -1187,4 +1190,10 @@
   .panel-hanja { font-size: 15px; }
   .panel-title-wrap .seal-stamp { right: 30px; font-size: 90px; }
   .panel-desc { font-size: 13px; }
+}
+
+/* 아주 좁은 화면: 메뉴 앞 글자 칸을 빼서 로고와 메뉴가 붙지 않게 */
+@media (max-width: 380px) {
+  .hud-glyph { display: none; }
+  .hud-btn { padding: 0 10px; }
 }

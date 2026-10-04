@@ -133,6 +133,9 @@ class FantasyMap {
           tooltip: `${region.name} (${region.hanja})`,
           activate: () => this.selectRegion(region.id)
         });
+        // 호버 동안 흐림 효과를 켜 두고, 떠난 뒤에는 색이 다 빠질 때까지 기다렸다 끕니다
+        polygon.addEventListener('pointerenter', () => this.softenRegion(polygon, true));
+        polygon.addEventListener('pointerleave', () => this.softenRegion(polygon, false));
         regionsLayer.appendChild(polygon);
       }
 
@@ -310,16 +313,10 @@ class FantasyMap {
     const curW = this.mapWidth * scale;
     const curH = this.mapHeight * scale;
     const m = this.panMargin;
-    // 족자가 열려 있으면 그만큼 지도를 더 끌어낼 수 있게 해, 가장자리 거점도 보이는 영역에 올 수 있도록
-    const occ = this.panelOcclusion();
-
-    // 지도가 '보이는 영역'(족자에 가려지지 않은 부분)보다 작으면 그 영역 가운데에, 크면 여유 범위 안에서 자유롭게
-    const visW = vw - occ.left - occ.right;
-    const visH = vh - occ.bottom;
-    const x = curW <= visW
-      ? occ.left + (visW - curW) / 2
-      : Math.min(Math.max(tx, vw - curW - m - occ.right), m + occ.left);
-    const y = curH <= visH ? (visH - curH) / 2 : Math.min(Math.max(ty, vh - curH - m - occ.bottom), m);
+    // 족자가 열려 있어도 지도는 늘 화면 전체를 덮어야 합니다 (반투명 족자 너머로 바깥이 비치지 않게).
+    // 족자 반대편에 선택한 곳이 오도록 족자 위치를 정하므로(placePanelSide) 가장자리 거점도 가려지지 않습니다.
+    const x = curW <= vw ? (vw - curW) / 2 : Math.min(Math.max(tx, vw - curW - m), m);
+    const y = curH <= vh ? (vh - curH) / 2 : Math.min(Math.max(ty, vh - curH - m), m);
     return { x, y };
   }
 
@@ -454,9 +451,34 @@ class FantasyMap {
   // 지도 좌표 (mapX, mapY)가 '보이는 영역'의 중앙에 오도록 이동 (족자·HUD 에 가려지지 않게)
   panTo(mapX, mapY, targetScale = 1.25) {
     const c = this.visibleCenter();
-    const scale = this.clampScale(targetScale);
+    // 지도는 화면 밖으로 끌어낼 수 없으므로, 가장자리 근처 지점이 족자에 가리면 필요한 만큼만 더 확대합니다
+    const scale = this.clampScale(Math.max(targetScale, this.minScaleToReveal(mapX, mapY)));
     this.animateTo(c.x - mapX * scale, c.y - mapY * scale, scale);
     this.isFitted = false;
+  }
+
+  // 지도 좌표 (mx, my)를 족자·GNB 에 가리지 않는 영역 안으로 옮길 수 있는 최소 배율.
+  // 지도가 화면을 꽉 채운 채(가장자리 고정) 움직일 수 있는 범위 안에서 계산합니다.
+  minScaleToReveal(mx, my) {
+    const { vw, vh } = this.viewportSize();
+    const occ = this.panelOcclusion();
+    const hud = document.querySelector('.top-hud');
+    const vpTop = this.viewport.getBoundingClientRect().top;
+    const hudBottom = hud ? Math.max(0, hud.getBoundingClientRect().bottom - vpTop) : 0;
+    const pad = 48;                                   // 핀·이름이 가장자리에 붙지 않을 여유
+    const box = {
+      left: occ.left + pad,
+      right: vw - occ.right - pad,
+      top: hudBottom + pad,
+      bottom: vh - occ.bottom - pad
+    };
+    const need = [];
+    // 가로: 지도 왼쪽 끝이 0, 오른쪽 끝이 vw 를 넘지 않는 범위에서 점이 [left, right] 안에 올 수 있어야
+    if (mx > 0) need.push(box.left / mx);
+    if (this.mapWidth > mx) need.push((vw - box.right) / (this.mapWidth - mx));
+    if (my > 0) need.push(box.top / my);
+    if (this.mapHeight > my) need.push((vh - box.bottom) / (this.mapHeight - my));
+    return Math.max(0, ...need.filter(Number.isFinite));
   }
 
   // 보이는 영역 중심을 기준으로 부드럽게 확대/축소 (+/− 버튼, 키보드)
@@ -719,10 +741,23 @@ class FantasyMap {
     return Math.min(this.maxScale, 1.1, Math.max(this.computeFitScale() * 1.4, 120 / (radius || 120)));
   }
 
+  // 구역의 흐림 효과 켜기/끄기 — 끌 때는 색이 사라지는 전환(0.25s)보다 조금 늦게
+  softenRegion(el, on) {
+    clearTimeout(el._softTimer);
+    if (on) el.classList.add('is-soft');
+    else el._softTimer = setTimeout(() => el.classList.remove('is-soft'), 400);
+  }
+
   updateSelectionHighlight() {
     const { kind, id, landmark } = this.selection || {};
     document.querySelectorAll('.region-polygon').forEach((el) => {
-      el.classList.toggle('is-selected', kind === 'region' && !landmark && el.dataset.region === id);
+      const on = kind === 'region' && !landmark && el.dataset.region === id;
+      // 선택이 풀릴 때도 색이 빠지는 동안 흐림을 유지 (마우스가 아직 위에 있으면 유지)
+      if (!on && el.classList.contains('is-selected') && !el.matches(':hover')) {
+        el.classList.add('is-soft');
+        this.softenRegion(el, false);
+      }
+      el.classList.toggle('is-selected', on);
     });
     document.querySelectorAll('.map-marker').forEach((el) => {
       const key = el.dataset.landmark;
