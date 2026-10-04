@@ -26,7 +26,7 @@
   position: absolute;
   inset: -60px;
   background: var(--map-image) center / cover no-repeat, var(--bg-map);
-  filter: blur(40px) brightness(0.92);
+  filter: blur(40px) brightness(0.8);
   transition: filter 0.8s ease;
   pointer-events: none;
 }
@@ -52,6 +52,8 @@
   pointer-events: none;
   background:
     radial-gradient(120% 95% at 50% 52%, transparent 40%, rgba(var(--bg-rgb), 0.38) 72%, rgba(var(--bg-rgb), 0.78) 100%),
+    /* 지도 전체를 살짝 눌러 한지의 흰빛을 차분하게 (값을 올리면 더 어두워집니다) */
+    linear-gradient(rgba(var(--bg-rgb), var(--map-dim, 0.14)), rgba(var(--bg-rgb), var(--map-dim, 0.14))),
     linear-gradient(180deg, rgba(var(--bg-rgb), 0.45) 0, transparent 160px, transparent calc(100% - 140px), rgba(var(--bg-rgb), 0.4) 100%);
 }
 
