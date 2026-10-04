@@ -15,6 +15,31 @@
   outline: none;
 }
 
+/* 안개 너머로 아주 희미하게 비치는 지도 — 걷히면 같은 지도가 드러나도록 이어 줍니다 */
+#intro-screen::before {
+  content: '';
+  position: absolute;
+  inset: -4%;
+  z-index: 1;                      /* 장막(0) 위, 흐르는 안개(2) 아래 */
+  background: url('../assets/images/shadowland_map.webp') center / cover no-repeat;
+  filter: grayscale(0.6) blur(3px) brightness(0.55) contrast(1.1);
+  opacity: 0.2;
+  animation: introMapDrift 40s ease-in-out infinite alternate;
+  transition: opacity 1.6s ease, filter 1.6s ease;
+  pointer-events: none;
+}
+
+@keyframes introMapDrift {
+  from { transform: scale(1.04) translate(0, 0); }
+  to { transform: scale(1.1) translate(-1.5%, 1%); }
+}
+
+/* 안개가 걷힐 때 지도가 먼저 또렷해지며 드러남 */
+#intro-screen.parted::before {
+  opacity: 0.5;
+  filter: grayscale(0.2) blur(0) brightness(0.9);
+}
+
 /* 안개 캔버스 (실시간 파티클 흐름) */
 #mist-canvas {
   position: absolute;
@@ -31,7 +56,7 @@
 .curtain-container {
   position: absolute;
   inset: 0;
-  z-index: 1;
+  z-index: 0;
   pointer-events: none;
 }
 
@@ -116,7 +141,23 @@
   padding-left: var(--korean-spacing);
   opacity: 0.85;
   text-shadow: 0 0 15px var(--accent-glow);
-  margin-bottom: 56px;
+  margin-bottom: 34px;
+}
+
+/* 제사(題詞) — 제목 아래 짧은 세 줄 */
+.intro-epigraph {
+  font-family: var(--font-serif);
+  font-size: clamp(12.5px, 1.5vw, 14px);
+  line-height: 2.1;
+  letter-spacing: 0.18em;
+  padding-left: 0.18em;
+  color: rgba(236, 230, 220, 0.62);
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.9);
+  margin-bottom: 46px;
+}
+
+.intro-epigraph span {
+  color: var(--accent-light);
 }
 
 /* 입장 안내 — 양옆으로 가는 선 사이의 작은 글씨 */

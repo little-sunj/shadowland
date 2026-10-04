@@ -44,6 +44,17 @@
   z-index: 1;
 }
 
+/* 지도 가장자리 비네트 — 지도 위·GNB 아래. 가장자리를 먹빛으로 은은하게 눌러 어두운 UI 와 이어 줍니다 */
+.map-vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 95% at 50% 52%, transparent 40%, rgba(var(--bg-rgb), 0.38) 72%, rgba(var(--bg-rgb), 0.78) 100%),
+    linear-gradient(180deg, rgba(var(--bg-rgb), 0.45) 0, transparent 160px, transparent calc(100% - 140px), rgba(var(--bg-rgb), 0.4) 100%);
+}
+
 #map-container {
   position: absolute;
   top: 0;
@@ -687,6 +698,11 @@
   z-index: -1;
 }
 
+/* 대표 그림이 있는 족자는 큰 한자가 그림과 겹쳐 얼룩처럼 보이므로 뺍니다 */
+.panel-hero + .panel-header .seal-stamp {
+  display: none;
+}
+
 .panel-header > * {
   position: relative;
   z-index: 1;
@@ -700,7 +716,7 @@
   margin-bottom: 18px;
 }
 
-/* 지배 세력 · 위험 등급 */
+/* 지배 세력 */
 .panel-meta {
   display: grid;
   grid-template-columns: auto 1fr;
@@ -720,40 +736,6 @@
 
 .panel-meta dd {
   color: var(--ink);
-}
-
-/* 위험 등급 — 다섯 칸 눈금 */
-.danger {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px 14px;
-}
-
-.danger-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.danger-pips {
-  display: inline-flex;
-  gap: 3px;
-}
-
-.danger-pips i {
-  width: 12px;
-  height: 6px;
-  border-radius: 1px;
-  background: rgba(var(--accent-dark-rgb), 0.22);
-}
-
-.danger-pips i.on {
-  background: var(--vermilion);
-}
-
-.danger-note {
-  font-size: 12px;
-  color: var(--vermilion-ink);
 }
 
 /* 선택된 거점 · 본거지 안내 상자 */
@@ -1015,9 +997,6 @@
   fill: var(--map-route);
 }
 
-.route-line {
-  stroke: var(--map-route);
-}
 
 /* 거점 핀 마커 */
 .map-marker {
@@ -1059,18 +1038,21 @@
   filter: drop-shadow(0 0 10px rgba(var(--marker-glow-rgb), 0.95));
 }
 
+/* 지도 위 이름 위계 — 지점(세력 본거지)은 크고 굵게, 거점은 작고 옅게 */
 .marker-label {
-  font-size: 13px;
-  font-weight: 700;
-  fill: var(--map-ink);
+  font-size: 11.5px;
+  font-weight: 600;
+  fill: var(--map-ink-soft);
   pointer-events: none;
   letter-spacing: 1px;
   transition: fill 0.2s ease;
 }
 
 .marker-label.is-major {
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 900;
+  letter-spacing: 2px;
+  fill: var(--map-ink);
 }
 
 .map-marker:hover .marker-label,

@@ -7,6 +7,23 @@
   <meta name="theme-color" content="#0e0c0a">
   <title>황량계 (荒涼界) | 동양 판타지 인터랙티브 전도</title>
 
+  <!-- 탭 아이콘 -->
+  <link rel="icon" type="image/png" sizes="64x64" href="assets/icons/favicon-64.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32.png">
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+
+  <!-- 링크 공유 미리보기 (카카오톡·디스코드·X 등).
+       og:image 는 전체 주소여야 하므로, 실제로 배포한 주소가 다르면 아래 두 줄의 주소를 바꿔 주세요 -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="황량계">
+  <meta property="og:title" content="황량계 (荒涼界) — 동양 판타지 인터랙티브 전도">
+  <meta property="og:description" content="국가도 법도 없이 오직 힘만이 법인 무법의 대륙. 황해를 둘러싼 네 땅과 세력을 지도로 둘러보세요.">
+  <meta property="og:url" content="https://little-sunj.github.io/shadowland/">
+  <meta property="og:image" content="https://little-sunj.github.io/shadowland/assets/icons/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+
   <!-- 웹폰트: CSS @import 대신 head에서 병렬 로드 (실제 사용하는 굵기만) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,7 +38,7 @@
 </head>
 <body>
 
-  <!-- 아이콘 모음 (이모지 대신 사용 — OS 마다 모양이 달라지지 않도록). 사용: <svg class="icon"><use href="#i-anchor"/></svg> -->
+  <!-- 아이콘 모음 (이모지 대신 사용 — OS 마다 모양이 달라지지 않도록). 사용: <svg class="icon"><use href="#i-warning"/></svg> -->
   <svg class="icon-sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
     <symbol id="i-warning" viewBox="0 0 24 24">
       <path d="M12 3.2 2.3 20.3h19.4L12 3.2z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
@@ -31,13 +48,6 @@
     <!-- 지도 위치 핀 (Google Material Symbols "Location On") — 모든 지점·거점 공통 -->
     <symbol id="i-location" viewBox="0 -960 960 960">
       <path d="M536.5-503.5Q560-527 560-560t-23.5-56.5Q513-640 480-640t-56.5 23.5Q400-593 400-560t23.5 56.5Q447-480 480-480t56.5-23.5ZM480-186q122-112 181-203.5T720-552q0-109-69.5-178.5T480-800q-101 0-170.5 69.5T240-552q0 71 59 162.5T480-186Zm0 106Q319-217 239.5-334.5T160-552q0-150 96.5-239T480-880q127 0 223.5 89T800-552q0 100-79.5 217.5T480-80Zm0-480Z" />
-    </symbol>
-    <symbol id="i-anchor" viewBox="0 0 24 24">
-      <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="5" r="2.2" />
-        <path d="M12 7.2V21M8 11h8M4.5 13.5a7.5 7.5 0 0 0 15 0" />
-        <path d="M4.5 13.5 3 15.5M19.5 13.5l1.5 2" />
-      </g>
     </symbol>
   </svg>
 
@@ -55,6 +65,7 @@
     <div class="intro-content">
       <h1 class="intro-title" lang="zh-Hant">荒涼界</h1>
       <p class="intro-korean">황량계</p>
+      <p class="intro-epigraph">황량한 이 세계에<br>황량한 이 심장에<br><span>맑은 낙원은 허용되지 않는다.</span></p>
       <p class="intro-cta" aria-hidden="true">
         <span class="cta-line"></span>
         <span class="cta-text">안개 걷기</span>
@@ -139,11 +150,10 @@
           <!-- 2. 구역 경계 — js/data.js 의 regions[].polygon 으로 생성 -->
           <g id="regions-layer"></g>
 
-          <!-- 3. 주간 뱃길 -->
-          <g id="day-shipping-route" class="map-decor">
-            <path class="route-line" d="M 790,985 C 960,1060 1330,1065 1525,955" stroke-width="4.5" stroke-dasharray="13,10" fill="none" opacity="0.9" />
-            <text x="1150" y="1010" class="map-text route-label" text-anchor="middle">주간 유일 뱃길</text>
-            <use class="map-icon route-icon" href="#i-anchor" width="22" height="22" />
+          <!-- 3. 황해 야간 경고 -->
+          <g id="sea-monster-warning" class="map-decor">
+            <text x="1150" y="1010" class="map-text route-label" text-anchor="middle">야간 괴수 출몰</text>
+            <use class="map-icon route-icon" href="#i-warning" width="22" height="22" />
           </g>
 
           <!-- 4. 지명 라벨 — regions[].label 로 생성 -->
@@ -157,6 +167,9 @@
         </svg>
       </div>
     </main>
+
+    <!-- 지도 가장자리 비네트 — 밝은 수묵 지도를 어두운 화면 틀에 녹여 줍니다 (클릭은 통과) -->
+    <div class="map-vignette" aria-hidden="true"></div>
 
     <!-- ==================================================================
          3. 동양풍 족자(Scroll) 상세 정보 패널
@@ -190,10 +203,12 @@
     <div class="modal-tabs" role="tablist" aria-label="비록 분류">
       <button type="button" role="tab" id="tab-lore" aria-controls="codex-lore" aria-selected="true">세계관</button>
       <button type="button" role="tab" id="tab-people" aria-controls="codex-people" aria-selected="false" tabindex="-1">등장인물</button>
+      <button type="button" role="tab" id="tab-beasts" aria-controls="codex-beasts" aria-selected="false" tabindex="-1">괴수</button>
     </div>
 
     <div class="modal-body" role="tabpanel" id="codex-lore" aria-labelledby="tab-lore" tabindex="0"></div>
     <div class="modal-body" role="tabpanel" id="codex-people" aria-labelledby="tab-people" tabindex="0" hidden></div>
+    <div class="modal-body" role="tabpanel" id="codex-beasts" aria-labelledby="tab-beasts" tabindex="0" hidden></div>
   </dialog>
 
   <!-- 스크립트 (file:// 로 더블클릭해도 동작하도록 일반 스크립트로 로드) -->

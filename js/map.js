@@ -15,20 +15,25 @@ function escapeHtml(value) {
 }
 
 // 아이콘 스프라이트(index.html 의 <symbol>)를 쓰는 인라인 SVG 문자열
-function iconHtml(name) {
-  return `<svg class="icon" aria-hidden="true"><use href="#i-${name}"/></svg>`;
+// 세력 소속 인물 목록 — 족자(map.js)와 등장인물 창이 함께 씁니다
+function memberListHtml(members) {
+  const e = escapeHtml;
+  return `
+    <ul class="member-list">
+      ${members.map((m) => {
+        const meta = [m.age && `${m.age}`, m.gender].filter(Boolean).join(' · ');
+        return `
+        <li class="member${m.deceased ? ' is-deceased' : ''}">
+          <span class="member-name">${e(m.name)}${m.hanja ? `<small lang="zh-Hant">${e(m.hanja)}</small>` : ''}${m.deceased ? '<em class="member-tag">故人</em>' : ''}</span>
+          ${meta ? `<span class="member-meta">${e(meta)}</span>` : ''}
+          <span class="member-note">${e(m.note)}${m.deceased ? ' · 작중 시점 고인' : ''}</span>
+        </li>`;
+      }).join('')}
+    </ul>`;
 }
 
-// 위험 등급 문자열("★★★★☆ (주간) / ★★★★★ (야간 극위험)")을 다섯 칸 눈금으로 바꿉니다
-function dangerHtml(level) {
-  return `<span class="danger">${String(level).split('/').map((part) => {
-    const count = (part.match(/★/g) || []).length;
-    const note = (part.match(/\(([^)]+)\)/) || [])[1] || '';
-    const pips = Array.from({ length: 5 }, (_, i) => `<i${i < count ? ' class="on"' : ''}></i>`).join('');
-    return `<span class="danger-item" role="img" aria-label="위험 ${count}/5${note ? ` (${escapeHtml(note)})` : ''}">
-      <span class="danger-pips" aria-hidden="true">${pips}</span>${note ? `<span class="danger-note" aria-hidden="true">${escapeHtml(note)}</span>` : ''}
-    </span>`;
-  }).join('')}</span>`;
+function iconHtml(name) {
+  return `<svg class="icon" aria-hidden="true"><use href="#i-${name}"/></svg>`;
 }
 
 function svgEl(tag, attrs = {}) {
@@ -74,6 +79,7 @@ class FantasyMap {
     this.animId = null;
     this.selection = null;       // { kind, id, landmark }
     this.hasInteracted = false;  // 사용자가 지도를 직접 움직였는지 (조작 안내 숨김용)
+    this.tooltipArmed = true;    // 툴팁 표시 허용 여부 (reveal 직후 잠시 막음)
     this.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     this.canHover = window.matchMedia('(hover: hover)');   // 터치 기기에서는 호버 툴팁 생략
 
@@ -207,7 +213,7 @@ class FantasyMap {
   // 지점(major)은 조금 크게 그립니다. 핀의 뾰족한 끝이 (x, y) 위치를 가리킵니다.
   createMarker(item, { major, tooltip, activate }) {
     const k = this.data.map.markerScale || 1;
-    const size = major ? 30 : 24;                  // 핀 크기 (마커 좌표계, 실제로는 k 배)
+    const size = major ? 31 : 21;                  // 핀 크기 (마커 좌표계, 실제로는 k 배) — 지점은 크게, 거점은 작게
 
     const g = svgEl('g', {
       class: `map-marker${major ? ' is-major' : ''}`,
@@ -231,7 +237,7 @@ class FantasyMap {
     g.appendChild(pin);
 
     const label = svgEl('text', {
-      y: major ? 15 : 13,
+      y: major ? 18 : 12,
       class: `map-text marker-label${major ? ' is-major' : ''}`,
       'text-anchor': 'middle'
     });
@@ -244,6 +250,7 @@ class FantasyMap {
 
   // 마우스 호버 / 키보드 포커스 / 클릭 / Enter 를 한 번에 연결
   bindSelectable(el, { tooltip, activate }) {
+    el._tooltip = tooltip;
     el.addEventListener('pointerenter', (e) => {
       if (e.pointerType === 'mouse' && this.canHover.matches) this.showTooltip(tooltip, e.clientX, e.clientY);
     });
@@ -399,6 +406,17 @@ class FantasyMap {
 
   reveal() {
     this.fitToScreen(true, 2200);
+    this.tooltipArmed = false;
+    const arm = (e) => {
+      if (!e.movementX && !e.movementY) return;     // 화면이 바뀌며 생기는 '가짜' 움직임은 무시
+      this.tooltipArmed = true;
+      window.removeEventListener('pointermove', arm);
+      // 이미 커서 아래에 있던 구역·거점의 툴팁을 바로 보여 줌
+      const under = document.elementFromPoint(e.clientX, e.clientY);
+      const target = under && under.closest('.region-polygon, .map-marker');
+      if (target && target._tooltip && e.pointerType === 'mouse') this.showTooltip(target._tooltip, e.clientX, e.clientY);
+    };
+    window.addEventListener('pointermove', arm);
   }
 
   handleResize() {
@@ -664,6 +682,8 @@ class FantasyMap {
   // 툴팁
   // ------------------------------------------------------------------
   showTooltip(text, x, y) {
+    // 인트로를 걷은 직후엔 커서가 가만히 있어도 그 아래 구역의 툴팁이 뜨므로, 한 번 움직인 뒤부터 표시
+    if (!this.tooltipArmed) return;
     this.tooltip.textContent = text;
     this.tooltip.classList.add('visible');
     this.positionTooltip(x, y);
@@ -845,6 +865,12 @@ class FantasyMap {
           </div>
         </aside>` : '';
 
+    // 소속 인물과 주인공(연묵)에 대한 태도 — data 의 stance / members
+    const peopleHtml = data.members ? `
+      <h3 class="panel-section-title">소속 인물</h3>
+      ${data.stance ? `<p class="stance"><span class="stance-label">연묵과의 관계</span>${e(data.stance)}</p>` : ''}
+      ${memberListHtml(data.members)}` : '';
+
     const rel = this.relatedLinks(kind, data);
     const linksHtml = rel.links.length ? `
       <h3 class="panel-section-title">${e(rel.title)}</h3>
@@ -875,7 +901,6 @@ class FantasyMap {
 
       <dl class="panel-meta">
         <dt>지배 세력</dt><dd>${e(data.ruler)}</dd>
-        <dt>위험 등급</dt><dd>${dangerHtml(data.dangerLevel)}</dd>
       </dl>
 
       ${keyPlaceHtml}
@@ -886,6 +911,8 @@ class FantasyMap {
       <ul class="panel-traits-list">
         ${data.traits.map((t) => `<li>${e(t)}</li>`).join('')}
       </ul>
+
+      ${peopleHtml}
 
       ${noticeHtml}
 
