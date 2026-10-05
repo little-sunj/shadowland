@@ -88,20 +88,25 @@
           <span class="brand-hanja" lang="zh-Hant" aria-hidden="true">荒涼界</span>
         </button>
 
-        <!-- 배경음악 플레이어 — 곡 정보는 js/data.js 의 bgm. 인트로를 걷는 순간 자동 재생 -->
+        <!-- 배경음악 플레이어 — 곡 목록은 js/data.js 의 bgm.tracks. 인트로를 걷는 순간 자동 재생 -->
         <div class="hud-surface bgm" id="bgm-player">
           <button type="button" class="bgm-toggle" id="btn-bgm" aria-pressed="false" aria-label="배경음악 재생">
             <svg class="bgm-icon-play" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg>
             <svg class="bgm-icon-pause" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M7.5 5.5h3v13h-3zM13.5 5.5h3v13h-3z" fill="currentColor"/></svg>
           </button>
           <span class="bgm-eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
-          <span class="bgm-title" id="bgm-title"></span>
+          <!-- 제목을 누르면 아래로 곡 목록이 펼쳐집니다 -->
+          <button type="button" class="bgm-title" id="bgm-title-btn" aria-haspopup="listbox" aria-expanded="false" aria-controls="bgm-list">
+            <span class="bgm-title-text" id="bgm-title"></span>
+            <svg class="bgm-caret" viewBox="0 0 24 24" width="12" height="12" aria-hidden="true"><path d="M6.5 9.5 12 15l5.5-5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <ol class="bgm-list" id="bgm-list" role="listbox" aria-label="배경음악 목록" hidden></ol>
           <label class="bgm-volume" title="볼륨">
             <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><path class="bgm-wave" d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
             <input type="range" id="bgm-volume" min="0" max="100" step="1" aria-label="배경음악 볼륨">
           </label>
         </div>
-        <audio id="bgm-audio" preload="auto" loop></audio>
+        <audio id="bgm-audio" preload="auto"></audio>
       </div>
 
       <nav class="hud-surface util-controls" aria-label="세계관 도감">

@@ -23,11 +23,14 @@ const WORLD_DATA = {
   worldName: "황량계",
   worldHanja: "荒涼界",
   worldDescription: "국가도 법도 없는, 통제를 벗어난 날것 그대로의 무법 대륙입니다. 오직 힘과 생존의 논리만이 작용하며, 지역에는 따로 이름이 없어 가운데 황해를 중심으로 북부 · 서부 · 동부 · 남부라 불립니다.",
-  // 배경음악 — 파일 이름에 공백이 있어도 됩니다 (자동으로 주소 변환)
+  // 배경음악 — 위에서부터 차례로 재생하고, 마지막 곡이 끝나면 첫 곡으로 돌아갑니다.
+  // 파일 이름에 공백이 있어도 됩니다 (자동으로 주소 변환)
   bgm: {
-    src: "assets/sound/gaze of a shadow.mp3",
-    title: "Gaze of a Shadow",
-    volume: 0.45
+    volume: 0.45,
+    tracks: [
+      { src: "assets/sound/Forbidden Love in the Snow.mp3", title: "Forbidden Love in the Snow" },
+      { src: "assets/sound/gaze of a shadow.mp3", title: "Gaze of a Shadow" }
+    ]
   },
   map: {
     image: "assets/images/shadowland_map.webp",

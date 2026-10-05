@@ -249,20 +249,119 @@
 }
 
 .bgm-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  height: 30px;
+  padding: 0 8px;
+  margin: 0 -4px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
   font-family: var(--font-serif);
   font-size: 12.5px;
   letter-spacing: 0.06em;
   color: var(--text-dim);
+  cursor: pointer;
+  transition: color 0.3s ease, background-color 0.25s var(--ease-out);
+}
+
+.bgm-title-text {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 160px;
-  transition: color 0.3s ease;
+  max-width: 190px;
+}
+
+.bgm-caret {
+  flex-shrink: 0;
+  opacity: 0.7;
+  transition: transform 0.25s var(--ease-out), opacity 0.25s ease;
 }
 
 .bgm.is-playing .bgm-title {
   color: var(--text-main);
 }
+
+.bgm-title:hover,
+.bgm-title:focus-visible,
+.bgm.is-list-open .bgm-title {
+  background: rgba(var(--accent-rgb), 0.1);
+  color: var(--accent-pale);
+  outline: none;
+}
+
+.bgm-title:hover .bgm-caret,
+.bgm.is-list-open .bgm-caret { opacity: 1; }
+.bgm.is-list-open .bgm-caret { transform: rotate(180deg); }
+
+/* 곡 목록 — 제목 아래로 펼쳐지는 먹빛 판 */
+.bgm-list {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 8px;
+  min-width: 260px;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  border: 1px solid rgba(var(--accent-rgb), 0.22);
+  border-radius: 6px;
+  background: rgba(var(--ink-panel-rgb), 0.94);
+  backdrop-filter: blur(14px) saturate(1.1);
+  -webkit-backdrop-filter: blur(14px) saturate(1.1);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.45);
+  animation: bgmListIn 0.22s var(--ease-out);
+  z-index: 5;
+}
+
+.bgm-list[hidden] { display: none; }
+
+@keyframes bgmListIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: none; }
+}
+
+.bgm-track {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 9px 12px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  font-family: var(--font-serif);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-align: left;
+  color: var(--text-body);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.bgm-track:hover,
+.bgm-track:focus-visible {
+  background: rgba(var(--accent-rgb), 0.12);
+  color: var(--text-main);
+  outline: none;
+}
+
+.bgm-track-no {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 지금 곡 — 청회색 글씨 + 왼쪽 가는 막대 */
+.bgm-track.is-current {
+  color: var(--accent-pale);
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+
+.bgm-track.is-current .bgm-track-no { color: var(--accent); }
 
 /* 볼륨 — 스피커 표시 + 가는 슬라이더 */
 .bgm-volume {
@@ -342,7 +441,8 @@
 
 /* 태블릿 폭에서는 곡 제목을 빼서 메뉴와 겹치지 않게 */
 @media (max-width: 900px) {
-  .bgm-title { display: none; }
+  .bgm-title-text { display: none; }   /* 제목 글자는 빼고 ▾ 만 남겨 목록은 열 수 있게 */
+  .bgm-title { padding: 0 6px; }
 }
 
 /* 음원을 못 불러오면 플레이어를 숨깁니다 */
@@ -1111,8 +1211,9 @@
   .bgm::before { top: 10px; bottom: 10px; }
   .bgm-toggle { width: 32px; height: 32px; }
   .bgm-eq,
-  .bgm-title,
-  .bgm-volume { display: none; }      /* 휴대폰은 기기 볼륨 버튼으로 (iOS 는 웹에서 볼륨 변경 자체를 막음) */
+  .bgm-volume { display: none; }
+  .bgm-title { margin: 0 0 0 2px; height: 32px; }
+  .bgm-list { left: 0; min-width: 230px; max-width: calc(100vw - 24px); }      /* 휴대폰은 기기 볼륨 버튼으로 (iOS 는 웹에서 볼륨 변경 자체를 막음) */
   .brand { gap: 8px; padding: 3px 12px; }
   .brand-hanja { display: none; }
   .brand-title { font-size: 16px; letter-spacing: 0.2em; margin-right: -0.2em; }
