@@ -28,8 +28,8 @@ const WORLD_DATA = {
   bgm: {
     volume: 0.45,
     tracks: [
-      { src: "assets/sound/Forbidden Love in the Snow.mp3", title: "Forbidden Love in the Snow" },
-      { src: "assets/sound/gaze of a shadow.mp3", title: "Gaze of a Shadow" }
+      { src: "assets/sound/gaze of a shadow.mp3", title: "Gaze of a Shadow" },
+      { src: "assets/sound/Forbidden Love in the Snow.mp3", title: "Forbidden Love in the Snow" }
     ]
   },
   map: {
